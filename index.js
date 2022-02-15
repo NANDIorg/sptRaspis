@@ -3,7 +3,6 @@ const md5 = require('md5')
 const mysql = require('mysql')
 const bodyParser = require('body-parser')
 const app = express()
-const mailer = require('./lib/nodemailer')
 const validationRegisterForm = require('./lib/validation')
 const connection = require('./lib/connetion')
 const makeToken = require('./lib/random')
@@ -66,21 +65,11 @@ app.post('/api/registration',(req, res)=>{
     const body = req.body
     validationRegisterForm(body.login, body.password, body.email, body.fio).then(result => {
             const returnValidation = result
-            console.log(123);
             if (returnValidation.status == 500) {
                 res.status(500).send(returnValidation.body)
             } else {
-                connection.query(`INSERT INTO users (login, password, email, fio) VALUES ('${body.login.trim()}', '${md5(body.password.trim())}', '${body.email.trim()}', '${body.fio.trim()}')`, (err, result, fields)=>{
+                connection.query(`INSERT INTO users (login, password, email, fio, group) VALUES ('${body.login.trim()}', '${md5(body.password.trim())}', '${body.email.trim()}', '${body.fio.trim()}', '${body.groupId}')`, (err, result, fields)=>{
                     if (err) return err
-                    let message = {
-                        to: `${body.email.trim()}`,
-                        subject: 'Подтверди',
-                        html: `
-                        <h1>Подтвердите ваш аккаунт ${body.login.trim()}</h1>
-                        <a href="#">123</a>
-                        `
-                    }
-                    mailer(message)
                     res.status(200).send('Ок')  
                 })
             }

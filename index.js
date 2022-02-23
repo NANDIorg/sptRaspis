@@ -7,30 +7,36 @@ const app = express()
 // const validationRegisterForm = require('./lib/validation')
 const connection = require('./lib/connetion')
 
+connection.connect();
+
 const authComponent = require('./component/auth/auth')
 const userComponent = require('./component/user/index')
+const griupScheduleComponent = require('./component/schedule/group')
+const pages = require('./pages')
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.use(authComponent)
 app.use(userComponent)
+app.use(griupScheduleComponent)
+app.use(pages)
+// createGroupSchedule()
 
-connection.connect();
 
 //* GET
 
 app.get('/', (req, res) => {
     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
     console.log(ip);
-    connection.query('SELECT * FROM sptraspis.users',(err, result, fields)=>{
-        if (err) {
-            console.log(err)
-            return
-        }
-        // console.log(result)
-        res.send(result)
-    })
+    // connection.query('SELECT * FROM sptraspis.users',(err, result, fields)=>{
+    //     if (err) {
+    //         console.log(err)
+    //         return
+    //     }
+    //     // console.log(result)
+    //     res.send(result)
+    // })
 })
 
 //* POST

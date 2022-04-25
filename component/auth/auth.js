@@ -1,18 +1,34 @@
-const auth = require('../../lib/auth')
-const makeToken = require('../../lib/random')
-const express = require('express')
-const router = express.Router()
+const connection = require('../../lib/connetion')
 
-router.post('/api/auth', (req, res) => {
-    const body = req.body
-    const token = makeToken()
-    auth(body.login,md5(body.password),token).then(result => {
-        if (result.status == 200) {
-            res.status(200).send(token)
-        } else {
-            res.status(500).send(result.body)
-        }
+async function auth (login, password, token) {
+    let objResult = {
+        status : 200,
+        body : {}
+    }
+    await new Promise((resolve, reject)=>{
+        connection.query(`SELECT id FROM users WHERE login = '${login}' and password = '${password}'`,(err, result)=>{
+            if (err) {
+                objResult.status = 500
+                reject()
+            }
+            if (result.length == 0) {
+                objResult.status = 100
+                objResult.body['err'] = 'Логин или пароль не верны'
+            }
+            resolve()
+        })
     })
-})
+    if (objResult.status == 500) return objResult
 
-module.exports = router
+    await new Promise((resolve, reject)=>{
+        connection.query(`UPDATE users SET token = '${token}', online = '1' WHERE (login = '${login}')`,(err, result)=>{
+            if (err) {
+                objResult.status = 500
+                reject()
+            }
+            resolve()
+        })
+    })
+    return objResult
+}
+module.exports = auth

@@ -1,66 +1,44 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
-
-// const md5 = require('md5')
-// const mysql = require('mysql')
-// const validationRegisterForm = require('./lib/validation')
+const path = require('path')
+const PORT = 13372
 const connection = require('./lib/connetion')
-
 connection.connect();
 
-const authComponent = require('./component/auth/auth')
+const adminAPI = require('./component/admin/index')
+const authComponent = require('./component/auth/index')
 const userComponent = require('./component/user/index')
-const griupScheduleComponent = require('./component/schedule/group')
-const pages = require('./pages')
+const groupFaculty = require('./component/groupFaculty/index')
+
+// const griupScheduleComponent = require('./component/schedule/group')
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+app.use(adminAPI())
 app.use(authComponent)
 app.use(userComponent)
-app.use(griupScheduleComponent)
-app.use(pages)
-// createGroupSchedule()
+app.use(groupFaculty)
 
+// app.use(griupScheduleComponent)
 
-//* GET
+app.use("/userAvatar", express.static(path.join(__dirname,"assets/image/userAvatar")))
+app.use("/achievements", express.static(path.join(__dirname,"assets/image/achievements")))
 
 app.get('/', (req, res) => {
     var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
     console.log(ip);
-    // connection.query('SELECT * FROM sptraspis.users',(err, result, fields)=>{
-    //     if (err) {
-    //         console.log(err)
-    //         return
-    //     }
-    //     // console.log(result)
-    //     res.send(result)
-    // })
+    res.end()
 })
 
-//* POST
+app.get('/*', (req, res) => {
+    res.send('ты кто')
+})
+app.post('/*', (req, res) => {
+    res.send('ты кто')
+})
 
+console.log(PORT);
 
-
-// app.post('/api/registration',(req, res)=>{
-//     const body = req.body
-//     validationRegisterForm(body.login, body.password, body.email, body.fio).then(result => {
-//             const returnValidation = result
-//             if (returnValidation.status == 500) {
-//                 res.status(500).send(returnValidation.body)
-//             } else {
-//                 connection.query(`INSERT INTO users (login, password, email, fio, group) VALUES ('${body.login.trim()}', '${md5(body.password.trim())}', '${body.email.trim()}', '${body.fio.trim()}', '${body.groupId}')`, (err, result, fields)=>{
-//                     if (err) return err
-//                     res.status(200).send('Ок')  
-//                 })
-//             }
-//         })
-    
-// })
-
-//* Функции
-
-
-
-app.listen(3000)
+app.listen(PORT)

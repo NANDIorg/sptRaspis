@@ -34,7 +34,7 @@ async function parse () {
             console.log('Уже новая');
         } else {
             console.log('Обновление');
-            let dateText = `${dateUpdate[2]}-${Number(dateUpdate[1])}-${Number(dateUpdate[0])}`
+            let dateText = `${dateUpdate[2]}-${Number(dateUpdate[1])}-${Number(dateUpdate[0])-3}`
             date = new Date(dateText)
             new Promise((resolve,reject)=>{
                 console.log(`DELETE FROM \`schedulegroup\` WHERE \`date\` < '${dateText}'`,date);
@@ -88,17 +88,17 @@ async function parse () {
                     length: 2,
                     lessonName1: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
                     lessonName2: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
-                    Auditorium1: $(el).find('td:nth-child(3)').find('.z2').text(),
-                    Auditorium2: $(el).find('td:nth-child(4)').find('.z2').text(),
-                    Teacher1: $(el).find('td:nth-child(3)').find('.z3').text(),
-                    Teacher2: $(el).find('td:nth-child(4)').find('.z3').text()
+                    auditorium1: $(el).find('td:nth-child(3)').find('.z2').text(),
+                    auditorium2: $(el).find('td:nth-child(4)').find('.z2').text(),
+                    teacher1: $(el).find('td:nth-child(3)').find('.z3').text(),
+                    teacher2: $(el).find('td:nth-child(4)').find('.z3').text()
                 }
             } else {
                 groupSchedule[gr][day][lesson] = {
                     length: 1,
                     lessonName: deleteN($(el).find('.ur').find('.z1').text()),
-                    Auditorium: $(el).find('.ur').find('.z2').text(),
-                    Teacher: $(el).find('.ur').find('.z3').text()
+                    auditorium: $(el).find('.ur').find('.z2').text(),
+                    teacher: $(el).find('.ur').find('.z3').text()
                 }
             }
         })
@@ -144,7 +144,6 @@ async function parse () {
                 }
             })
         })
-        // console.log(idGroup);
         if (idGroup != 0) {
             for (el2 in groupSchedule[el]) {
                 if (el2 == "name" || el2 == "href") {
@@ -167,7 +166,7 @@ async function parse () {
 
                 if (idSchedulegroup != 0) {
                     await new Promise((resolve,reject)=>{
-                        connection.query(`UPDATE \`schedulegroup\` SET \`scheduleJSON\` = '${JSON.stringify(groupSchedule[el][el2])}', \`dataUpdate\` = '${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}' WHERE \`id\` = '${idSchedulegroup}'`,(err,resultCon)=>{
+                        connection.query(`UPDATE \`schedulegroup\` SET \`scheduleJSON\` = '${JSON.stringify(groupSchedule[el][el2])}', \`dataUpdate\` = '${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()+3}' WHERE \`id\` = '${idSchedulegroup}'`,(err,resultCon)=>{
                             if (err) resolve()
                             // console.log(resultCon);
                             resolve()
@@ -175,7 +174,7 @@ async function parse () {
                     })
                 } else {
                     await new Promise((resolve,reject)=>{
-                        connection.query(`INSERT INTO \`schedulegroup\` (\`idGroup\`, \`date\`, \`scheduleJSON\`,\`dataUpdate\`) VALUES ('${idGroup}', '${dataI}', '${JSON.stringify(groupSchedule[el][el2])}','${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}')`,(err,resultCon)=>{
+                        connection.query(`INSERT INTO \`schedulegroup\` (\`idGroup\`, \`date\`, \`scheduleJSON\`,\`dataUpdate\`) VALUES ('${idGroup}', '${dataI}', '${JSON.stringify(groupSchedule[el][el2])}','${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()+3}')`,(err,resultCon)=>{
                             if (err) resolve()
                             // console.log(resultCon);
                             resolve()
@@ -188,7 +187,6 @@ async function parse () {
             
         }
     }
-    // console.log(groupSchedule);
     console.log('Обновилось')
 }
 

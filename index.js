@@ -10,6 +10,7 @@ const adminAPI = require('./component/admin/index')
 const authComponent = require('./component/auth/index')
 const userComponent = require('./component/user/index')
 const groupFaculty = require('./component/groupFaculty/index')
+const md5 = require('md5')
 
 // const griupScheduleComponent = require('./component/schedule/group')
 
@@ -33,7 +34,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/*', (req, res) => {
-    res.status(404).send('ты кто GET')
+    res.status(404).send("Ты кто GET")
 })
 app.post('/*', (req, res) => {
     res.status(404).send('ты кто POST')

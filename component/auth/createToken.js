@@ -1,5 +1,5 @@
 function makeToken () {
-    let text = 'qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM'
+    let text = 'qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM$'
     let result = ''
     for (let i = 0; i < 50; i++) {
         result += text[getRandomInt(text.length)]

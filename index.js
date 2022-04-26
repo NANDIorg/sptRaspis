@@ -33,10 +33,10 @@ app.get('/', (req, res) => {
 })
 
 app.get('/*', (req, res) => {
-    res.send('ты кто')
+    res.status(404).send('ты кто GET')
 })
 app.post('/*', (req, res) => {
-    res.send('ты кто')
+    res.status(404).send('ты кто POST')
 })
 
 console.log(PORT);

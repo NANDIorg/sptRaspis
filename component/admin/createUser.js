@@ -38,8 +38,8 @@ function index() {
             body.forEach(async el => {
                 let image = `userAvatar/standartUser.png`
                 await new Promise((resolve, reject) => {
-                    connection.query(`INSERT INTO users (login, password, email, fio, groupId, role, image) 
-                    VALUES ('${el.login}', '${md5(el.password)}', '${el.email}', '${el.fullname}', '${(el.group == null) ? 0 : el.group}', '${(el.isTeacher) ? 1 : 0}', '${image}')`,(err,result) => {
+                    connection.query(`INSERT INTO users (login, password, email, fio, groupId, role) 
+                    VALUES ('${el.login}', '${md5(el.password)}', '${el.email}', '${el.fullname}', '${(el.group == null) ? 0 : el.group}', '${(el.isTeacher) ? 1 : 0}')`,(err,result) => {
                         connection.query(`UPDATE users SET urlId = '${createUrlID(el.idUser,result.insertId)}' WHERE (id = '${result.insertId}')`,()=>{
                             resolve()
                         })
@@ -54,7 +54,6 @@ function index() {
     })
 
     router.get("/api/admin/getGroup",async (req, res) => {
-        console.log("getGroup");
         let resultArray = []
         await new Promise((resolve) => {
             connection.query(`SELECT name, id FROM grouptable`, (err, result) => {

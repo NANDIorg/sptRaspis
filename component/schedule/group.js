@@ -3,24 +3,25 @@ const router = express.Router()
 const connection = require('../../lib/connetion')
 const createGroupSchedule = require('./createGroupSchedule')
 
-router.get('/api/groupScgedule', (req, res) => {
-    const query = req.query
-    console.log(query);
-    connection.query(`SELECT * FROM \`schedulegroup\` WHERE \`idGroup\` = '${query.idGroup}' and \`date\` = '${query.date}'`,(err,result)=>{
-        console.log(result);
-        if (result.length > 0) {
-            res.send({
-                status : 200,
-                schedule : JSON.parse(result[0].scheduleJSON),
-                dateUpdate : result[0].dataUpdate
-            })
-        } else {
-            res.send({
-                status : 404
+function index () {
+    router.get('/api/groupSchedule', (req, res) => {
+        const query = req.query
+        if (query.idGroup == undefined || query.date == undefined) {res.sendStatus(500)} else {
+            connection.query(`SELECT * FROM \`schedulegroup\` WHERE \`idGroup\` = '${query.idGroup}' and \`date\` = '${query.date}'`,(err,result)=>{
+                if (result.length > 0) {
+                    res.send({
+                        schedule : JSON.parse(result[0].scheduleJSON),
+                        dateUpdate : result[0].dataUpdate
+                    })
+                } else {
+                    res.sendStatus(500)
+                }
+                
             })
         }
-        
     })
-})
 
-module.exports = router
+    return router
+}
+
+module.exports = index

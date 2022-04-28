@@ -1,12 +1,11 @@
 const express = require('express')
+const group = require('./group')
 const router = express.Router()
-const connection = require('../../lib/connetion')
-// const createGroupSchedule = require('./createGroupSchedule')
 
 function index () {
-    
+    router.use(group())
 
     return router
-}
+} 
 
 module.exports = index

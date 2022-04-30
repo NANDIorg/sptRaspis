@@ -11,7 +11,7 @@ function index () {
                 if (result.length > 0) {
                     res.send({
                         schedule : JSON.parse(result[0].scheduleJSON),
-                        dateUpdate : result[0].dataUpdate
+                        lastUpdate : result[0].dataUpdate
                     })
                 } else {
                     res.sendStatus(500)

@@ -1,19 +1,23 @@
 const connection = require('../../lib/connetion')
 
 async function auth (login, password, token) {
-    let resultLogin = false
+    let res = {
+        resultLogin : false,
+        role : 0
+    }
     await new Promise((resolve, reject)=>{
-        connection.query(`SELECT id FROM users WHERE login = '${login}' and password = '${password}'`,(err, result)=>{
+        connection.query(`SELECT id, role FROM users WHERE login = '${login}' and password = '${password}'`,(err, result)=>{
             if (err) {
                 resolve()
             }
             if (result.length != 0) {
-                resultLogin = true
+                res.resultLogin = true
+                res.role = result.role
             }
             resolve()
         })
     })
-    if (!resultLogin) return resultLogin
+    if (!res.resultLogin) return res
 
     await new Promise((resolve, reject)=>{
         connection.query(`UPDATE users SET token = '${token}', online = '1' WHERE (login = '${login}')`,(err, result)=>{
@@ -23,6 +27,6 @@ async function auth (login, password, token) {
             resolve()
         })
     })
-    return resultLogin
+    return res
 }
 module.exports = auth

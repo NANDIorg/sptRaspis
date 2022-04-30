@@ -74,32 +74,60 @@ async function parse () {
                     weekEv = 'Чётная'
                 }
                 dateLesson = day.split('<br>')[0].split('.')
-                
-                groupSchedule[gr][day] = {
-                    date : `${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`,
+                // groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`] = []
+                // groupSchedule[gr][day]
+                groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`] = {
+                    schedule : [],
                     weekEven : weekEv
                 }
                 lesson = `lessonNum${$(el).find("td:nth-child(2)").text()}`
+                lessonNumber = `${$(el).find("td:nth-child(2)").text()}`
             } else {
                 lesson = `lessonNum${$(el).find("td:nth-child(1)").text()}`
+                lessonNumber = `${$(el).find("td:nth-child(1)").text()}`
             }
+            // groupSchedule[gr].weekEven = weekEv
             if ($(el).find(".ur").attr('colspan') == "1") {
-                groupSchedule[gr][day][lesson] = {
-                    length: 2,
-                    lessonName1: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
-                    lessonName2: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
-                    auditorium1: $(el).find('td:nth-child(3)').find('.z2').text(),
-                    auditorium2: $(el).find('td:nth-child(4)').find('.z2').text(),
-                    teacher1: $(el).find('td:nth-child(3)').find('.z3').text(),
-                    teacher2: $(el).find('td:nth-child(4)').find('.z3').text()
-                }
+                // groupSchedule[gr][day][lesson] = {
+                //     length: 2,
+                //     lessonName1: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
+                //     lessonName2: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
+                //     auditorium1: $(el).find('td:nth-child(3)').find('.z2').text(),
+                //     auditorium2: $(el).find('td:nth-child(4)').find('.z2').text(),
+                //     teacher1: $(el).find('td:nth-child(3)').find('.z3').text(),
+                //     teacher2: $(el).find('td:nth-child(4)').find('.z3').text()
+                // }
+                groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push([
+                        {
+                            id : lessonNumber,
+                            lessonNumber : lessonNumber,
+                            lessonName: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
+                            auditorium: $(el).find('td:nth-child(3)').find('.z2').text(),
+                            teacher: $(el).find('td:nth-child(3)').find('.z3').text(),
+                        },
+                        {
+                            id : lessonNumber,
+                            lessonNumber : lessonNumber,
+                            lessonName: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
+                            auditorium: $(el).find('td:nth-child(4)').find('.z2').text(),
+                            teacher: $(el).find('td:nth-child(4)').find('.z3').text()
+                        }
+                    ]
+                )
             } else {
-                groupSchedule[gr][day][lesson] = {
-                    length: 1,
+                // groupSchedule[gr][day][lesson] = {
+                //     length: 1,
+                //     lessonName: deleteN($(el).find('.ur').find('.z1').text()),
+                //     auditorium: $(el).find('.ur').find('.z2').text(),
+                //     teacher: $(el).find('.ur').find('.z3').text()
+                // }
+                groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push({
+                    id : lessonNumber,
+                    lessonNumber : lessonNumber,
                     lessonName: deleteN($(el).find('.ur').find('.z1').text()),
                     auditorium: $(el).find('.ur').find('.z2').text(),
                     teacher: $(el).find('.ur').find('.z3').text()
-                }
+                })
             }
         })
     }
@@ -129,7 +157,6 @@ async function parse () {
     }
 
     
-
     for (el in groupSchedule) {
         let idGroup = 0
         await new Promise((resolve,reject)=>{
@@ -150,11 +177,11 @@ async function parse () {
                     continue
                 }
                 let idSchedulegroup
-                let dataI = groupSchedule[el][el2].date
-                localDate = new Date(dataI)
-                // console.log(idGroup,dataI,JSON.stringify(groupSchedule[el][el2]));
+                localDate = new Date(el2)
+                // console.log(idGroup,el2,JSON.stringify(groupSchedule[el][el2]));
                 await new Promise((resolve,reject)=>{
-                    connection.query(`SELECT * FROM \`schedulegroup\` WHERE \`date\` = '${dataI}' and \`idGroup\` = '${idGroup}' `, (err,resultCon) => {
+                    // console.log(el2);
+                    connection.query(`SELECT * FROM \`schedulegroup\` WHERE \`date\` = '${el2}' and \`idGroup\` = '${idGroup}' `, (err,resultCon) => {
                         if (resultCon.length > 0) {
                             idSchedulegroup = resultCon[0].id
                         } else {
@@ -163,7 +190,6 @@ async function parse () {
                         resolve()
                     })
                 })
-
                 if (idSchedulegroup != 0) {
                     await new Promise((resolve,reject)=>{
                         connection.query(`UPDATE \`schedulegroup\` SET \`scheduleJSON\` = '${JSON.stringify(groupSchedule[el][el2])}', \`dataUpdate\` = '${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()+3}' WHERE \`id\` = '${idSchedulegroup}'`,(err,resultCon)=>{
@@ -174,7 +200,7 @@ async function parse () {
                     })
                 } else {
                     await new Promise((resolve,reject)=>{
-                        connection.query(`INSERT INTO \`schedulegroup\` (\`idGroup\`, \`date\`, \`scheduleJSON\`,\`dataUpdate\`) VALUES ('${idGroup}', '${dataI}', '${JSON.stringify(groupSchedule[el][el2])}','${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()+3}')`,(err,resultCon)=>{
+                        connection.query(`INSERT INTO \`schedulegroup\` (\`idGroup\`, \`date\`, \`scheduleJSON\`,\`dataUpdate\`) VALUES ('${idGroup}', '${el2}', '${JSON.stringify(groupSchedule[el][el2])}','${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()+3}')`,(err,resultCon)=>{
                             if (err) resolve()
                             // console.log(resultCon);
                             resolve()

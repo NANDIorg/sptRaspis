@@ -5,18 +5,23 @@ const md5 = require('md5')
 const router = express.Router()
 
 router.post('/api/auth', async (req, res) => {
-    let result = false
+    let result = {
+        resultLogin : false
+    }
     const body = req.body
     const token = makeToken()
     if (body.login == null || body.password == null) {
-        result = false
+        result.resultLogin = false
     } else {
         result = await auth(body.login,md5(body.password),md5(token))
     }
-    if (result) {
-        res.status(200).send(token)
+    if (result.resultLogin) {
+        res.status(200).send({
+            token : token,
+            role : result.role
+        })
     } else {
-        res.status(500).send({error : "Ошибка входа"})
+        res.status(403).send({error : "Ошибка входа"})
     }
 })
 

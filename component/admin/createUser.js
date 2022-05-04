@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const connection = require('../../lib/connetion')
 const checkAdmin = require('./checkTokenAdmin')
+const md5 = require('md5')
 const emailRegExp = /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/g
 
 function makeUnId () {

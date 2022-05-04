@@ -36,7 +36,8 @@ function index() {
         let resultCheckAdmin = true
         console.log(resultCheckAdmin);
         if (resultCheckAdmin) {
-            body.forEach(async el => {
+            for (let i = 0; i < body.length; i++) {
+                const el = body[i];
                 let image = `userAvatar/standartUser.png`
                 await new Promise((resolve, reject) => {
                     connection.query(`INSERT INTO users (login, password, email, fio, groupId, role) 
@@ -46,8 +47,7 @@ function index() {
                         })
                     })  
                 })
-                
-            })
+            }
             res.sendStatus(200)
         } else {
             res.status(500).send({error : "Token is not true"})

@@ -6,20 +6,29 @@ const emailRegExp = /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/g
 
 function index () {
     router.get("/api/admin/studentInGroup", async (req, res)=>{
-        const idGroup = req.query.idGroup
-
+        const idGroup = JSON.parse(req.query.idGroup)
+        console.log(JSON.parse(req.query.idGroup));
+        let resultArr = []
         if (!idGroup) {
             res.status(500).send("Не все данные")
             return
         }
 
-        await new Promise((resolve, reject) => {
-            connection.query(`SELECT id, fio, image FROM users
-            WHERE role = 0 and groupId = ${idGroup}`,(err,result)=>{
-                res.send(result)
-                resolve()
+        for (let i = 0; i < idGroup.length; i++) {
+            const el = idGroup[i];
+            await new Promise((resolve) => {
+                connection.query(`SELECT id, fio, image FROM users
+                WHERE role = 0 and groupId = ${el}`, (err, result) => {
+                    result.forEach(el2 => {
+                        resultArr.push(el2)
+                    })
+                    resolve()
+                })
             })
-        })
+        }
+
+        res.send(resultArr)
+        
     })
 
     router.post("/api/admin/createDist", async (req, res) => {
@@ -59,21 +68,23 @@ function index () {
             })
         })
 
-        await teacher.forEach(async el => {
+        for (let i = 0; i < teacher.length; i++) {
+            const el = teacher[i];
             await new Promise((resolve, reject) => {
                 connection.query(`INSERT INTO disciplineteacher (idDiscipline, idTeacher) VALUES ('${idDiscipline}', '${el}')`, (err, result) => {
                     resolve()
                 })
             })
-        })
+        }
 
-        await group.forEach(async el => {
+        for (let i = 0; i < group.length; i++) {
+            const el = group[i];
             await new Promise((resolve, reject) => {
                 connection.query(`INSERT INTO disciplinestudent (idDiscipline, idGroup) VALUES ('${idDiscipline}', '${el}')`, (err, result) => {
                     resolve()
                 })
             })
-        })
+        }
     })
 
     return router

@@ -12,8 +12,8 @@ let resultArr = []
 async function parse () {
 
     await new Promise((resolve,reject)=>{
-        connection.query(`SELECT * FROM \`schedulegroup\` ORDER BY \`dataUpdate\` DESC LIMIT 1`, (err,resultCon) => {
-            // console.log(resultCon);
+        connection.query(`SELECT * FROM schedulegroup ORDER BY dataUpdate DESC LIMIT 1`, (err,resultCon) => {
+            console.log(resultCon);
             if (resultCon.length > 0) {
                 dataUpdate = resultCon[0].dataUpdate
             } else {

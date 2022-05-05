@@ -4,7 +4,14 @@ const app = express()
 const path = require('path')
 const PORT = 13372
 const connection = require('./lib/connetion')
-connection.connect();
+connection.connect((err)=> {
+    if (err) {
+        return console.error("Ошибка: " + err.message);
+      }
+      else{
+        console.log("Подключение к серверу MySQL успешно установлено");
+      }
+});
 const md5 = require('md5')
 
 const adminAPI = require('./component/admin/index')

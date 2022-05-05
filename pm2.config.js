@@ -3,6 +3,6 @@ module.exports = {
     name   : "spt-backend",
     namespase : "spt-backend",
     script : "npm",
-    args : "run start"
+    args : "start"
   }]
 }

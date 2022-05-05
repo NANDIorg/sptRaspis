@@ -4,10 +4,12 @@ const connection = require('../../lib/connetion')
 const createGroupSchedule = require('./createGroupSchedule')
 
 function index () {
+    
     router.get('/api/groupSchedule', (req, res) => {
+        console.log(req.query);
         const query = req.query
         if (query.idGroup == undefined || query.date == undefined) {res.sendStatus(500)} else {
-            connection.query(`SELECT * FROM \`schedulegroup\` WHERE \`idGroup\` = '${query.idGroup}' and \`date\` = '${query.date}'`,(err,result)=>{
+            connection.query(`SELECT * FROM schedulegroup WHERE idGroup = '${query.idGroup}' and date = '${query.date}'`,(err,result)=>{
                 if (result.length > 0) {
                     res.send({
                         schedule : JSON.parse(result[0].scheduleJSON),

@@ -1,6 +1,7 @@
 const connection = require('../../lib/connetion')
 
 async function auth (login, password, token) {
+    console.log(login, password);
     let res = {
         resultLogin : false,
         role : 0
@@ -12,7 +13,7 @@ async function auth (login, password, token) {
             }
             if (result.length != 0) {
                 res.resultLogin = true
-                res.role = result.role
+                res.role = result[0].role
             }
             resolve()
         })

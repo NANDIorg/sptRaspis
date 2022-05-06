@@ -13,7 +13,6 @@ async function parse () {
 
     await new Promise((resolve,reject)=>{
         connection.query(`SELECT * FROM schedulegroup ORDER BY dataUpdate DESC LIMIT 1`, (err,resultCon) => {
-            console.log(resultCon);
             if (resultCon.length > 0) {
                 dataUpdate = resultCon[0].dataUpdate
             } else {
@@ -99,14 +98,14 @@ async function parse () {
                 // }
                 groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push([
                         {
-                            id : lessonNumber,
+                            id : lessonNumber + '1',
                             lessonNumber : lessonNumber,
                             lessonName: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
                             auditorium: $(el).find('td:nth-child(3)').find('.z2').text(),
                             teacher: $(el).find('td:nth-child(3)').find('.z3').text(),
                         },
                         {
-                            id : lessonNumber,
+                            id : lessonNumber + '2',
                             lessonNumber : lessonNumber,
                             lessonName: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
                             auditorium: $(el).find('td:nth-child(4)').find('.z2').text(),

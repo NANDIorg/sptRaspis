@@ -20,7 +20,7 @@ router.get('/api/getAll', async (req,res)=>{
     let arrayFaculty = []
     let arrayResult = []
     await new Promise((resolve, reject) => {
-        connection.query(`SELECT * FROM \`faculty\``, (err,result)=>{
+        connection.query(`SELECT * FROM faculty`, (err,result)=>{
             arrayFaculty = result
             resolve()
         })

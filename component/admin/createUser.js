@@ -29,6 +29,7 @@ function createUrlID (url, id) {
 
 function index() {
     router.post('/api/admin/createUser', async (req, res)=>{
+        let resultArray = []
         // const token = req.headers.token
         const body = req.body
         console.log(body);
@@ -37,18 +38,45 @@ function index() {
         console.log(resultCheckAdmin);
         if (resultCheckAdmin) {
             for (let i = 0; i < body.length; i++) {
+                let errLogin = false
+                await new Promise((resolve)=>{
+                    connection.query(`SELECT id FROM users WHERE login = '${el.login}'`,(err,result)=>{
+                        if (err) {
+                            resolve()
+                            errLogin = true
+                        }
+                        if (result.length > 0) {
+                            errLogin = true
+                            resolve()
+                        }
+                    })
+                })
+
+                if (errLogin) {
+                    resultArray.push({
+                        id : el.id,
+                        status : 403,
+                        err : "Invalide login"
+                    })
+                    continue
+                }
                 const el = body[i];
                 let image = `userAvatar/standartUser.png`
                 await new Promise((resolve, reject) => {
                     connection.query(`INSERT INTO users (login, password, email, fio, groupId, role) 
                     VALUES ('${el.login}', '${md5(el.password)}', '${el.email}', '${el.fullname}', '${(el.group == null) ? 0 : el.group}', '${(el.isTeacher) ? 1 : 0}')`,(err,result) => {
                         connection.query(`UPDATE users SET urlId = '${createUrlID(el.idUser,result.insertId)}' WHERE (id = '${result.insertId}')`,()=>{
+                            resultArray.push({
+                                id : el.id,
+                                status : 200,
+                                err : ""
+                            })
                             resolve()
                         })
                     })  
                 })
             }
-            res.sendStatus(200)
+            res.status(200).send(resultArray)
         } else {
             res.status(500).send({error : "Token is not true"})
         }

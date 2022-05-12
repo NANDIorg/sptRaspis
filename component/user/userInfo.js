@@ -35,7 +35,6 @@ function index () {
         JOIN groupTable ON \`groupTable\`.\`id\` = \`users\`.\`groupId\`
         WHERE urlId = '${query}'`,(err, result)=>{
             if (err) return 
-            console.log(result);
             resultObj.id = Number(result[0].idUser)
             resultObj.info.userImage = result[0].imageUser
             resultObj.info.initials = result[0].FIOUser
@@ -52,6 +51,24 @@ function index () {
             // resultObj.settings.changedPasswordAgo = result[0].groupName
     
             res.status(200).send(resultObj)
+        })
+    })
+
+    router.get("/api/user/miniInfo", async (req, res) => {
+        const token = md5(req.query.token)
+
+        await new Promise((resolve)=>{
+            connection.query(`SELECT users.fio as fullname, grouptable.name as grouptableName, case when users.role = 0 then (year(NOW()) - grouptable.yearStart) else null end as course 
+            FROM users
+            left JOIN grouptable ON grouptable.id = users.groupId
+            WHERE users.token = '${token}'`,(err,result)=>{
+                res.send({
+                    fullname : result[0].fullname,
+                    group : result[0].grouptableName,
+                    course : result[0].course
+                })
+                resolve()
+            })
         })
     })
 

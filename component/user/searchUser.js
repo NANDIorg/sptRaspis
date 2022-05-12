@@ -10,7 +10,6 @@ function index () {
             connection.query(`SELECT users.id, users.image, users.fio, users.role, grouptable.name as groupName, year(NOW()) - grouptable.yearStart as course, users.wordsUser, users.urlId, users.online FROM users
             LEFT JOIN grouptable ON grouptable.id = users.groupId
             WHERE users.role != 2`, (err, result) => {
-                // console.log(result)
                 result.forEach(el => {
                     arrResult.push({
                         id: el.id,

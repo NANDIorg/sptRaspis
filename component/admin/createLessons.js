@@ -5,9 +5,17 @@ const checkAdmin = require('./checkTokenAdmin')
 const emailRegExp = /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/g
 
 function index () {
+    router.get("/api/admin/getTypeDiscipline", async (req,res)=>{
+        await new Promise((resolve)=>{
+            connection.query(`SELECT * FROM typediscipline`,(err,result)=>{
+                res.send(result)
+                resolve()
+            })
+        })
+    })
+
     router.get("/api/admin/studentInGroup", async (req, res)=>{
         const idGroup = JSON.parse(req.query.idGroup)
-        console.log(JSON.parse(req.query.idGroup));
         let resultArr = []
         if (!idGroup) {
             res.status(500).send("Не все данные")
@@ -32,10 +40,11 @@ function index () {
     })
 
     router.post("/api/admin/createDist", async (req, res) => {
-        const token = req.headers.token
+        // const token = req.headers.token
         const body = req.body
+        console.log(body);
 
-        if (body.number && body.title && body.type && body.teacher && body.group) {
+        if (!body.number || !body.title || !body.type || !body.teacher || !body.group) {
             res.sendStatus(403)
             return
         }
@@ -45,17 +54,18 @@ function index () {
         const teacher = body.teacher
         const group = body.group 
         
-        if (nameDiscipline.length != 0 && type.length != 0 && teacher.length != 0 && group.length != 0) {
+        if (nameDiscipline.length == 0 || type.length == 0 || teacher.length == 0 || group.length == 0) {
+            console.log("Данные пустые");
             res.sendStatus(403)
             return
         }
 
         // const resultCheckAdmin = await checkAdmin(token)
         let resultCheckAdmin = true
-        console.log(resultCheckAdmin);
         
         if (!resultCheckAdmin) {
-            res.status(500).send("Нельзя")
+            console.log("Нельзя");
+            res.status(403).send("Нельзя")
             return
         }
 

@@ -9,7 +9,7 @@ async function auth (login, password, token) {
     await new Promise((resolve, reject)=>{
         connection.query(`SELECT id, role FROM users WHERE login = '${login}' and password = '${password}'`,(err, result)=>{
             if (err) {
-                resolve()
+                reject()
             }
             if (result.length != 0) {
                 res.resultLogin = true
@@ -21,10 +21,7 @@ async function auth (login, password, token) {
     if (!res.resultLogin) return res
 
     await new Promise((resolve, reject)=>{
-        connection.query(`UPDATE users SET token = '${token}', online = '1' WHERE (login = '${login}')`,(err, result)=>{
-            if (err) {
-                resolve()
-            }
+        connection.query(`UPDATE users SET token = '${token}', online = '1' WHERE (login = '${login}')`, (err,result) => {
             resolve()
         })
     })

@@ -35,9 +35,18 @@ function index() {
         console.log(body);
         // const resultCheckAdmin = await checkAdmin(token)
         let resultCheckAdmin = true
-        console.log(resultCheckAdmin);
+        
         if (resultCheckAdmin) {
             for (let i = 0; i < body.length; i++) {
+                const el = body[i]
+                console.log(el);
+                if (!el.login || !el.password || !el.fullname || !el.group || !el.isTeacher) {
+                    resultArray.push({
+                        id : el.id,
+                        status : 403,
+                        err : "Invalid data"
+                    })
+                }
                 let errLogin = false
                 await new Promise((resolve)=>{
                     connection.query(`SELECT id FROM users WHERE login = '${el.login}'`,(err,result)=>{
@@ -60,7 +69,7 @@ function index() {
                     })
                     continue
                 }
-                const el = body[i];
+                
                 let image = `userAvatar/standartUser.png`
                 await new Promise((resolve, reject) => {
                     connection.query(`INSERT INTO users (login, password, email, fio, groupId, role) 
@@ -98,7 +107,6 @@ function index() {
 
     router.get("/api/admin/getGroupInfo",async (req, res) => {
         const query = req.query
-        console.log("getGroupInfo",query);
 
         await new Promise((resolve) => {
             connection.query(`SELECT groupTable.yearStart, groupTable.yearEnd, teacher.fio as CuratorFIO, facult.fullName as facultName, count(student.id) as countStudent FROM grouptable as groupTable

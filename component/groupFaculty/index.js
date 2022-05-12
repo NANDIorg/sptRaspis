@@ -3,15 +3,14 @@ const router = express.Router()
 const connection = require('../../lib/connetion')
 
 router.get('/api/getFaculty', (req,res)=>{
-    connection.query(`SELECT * FROM \`faculty\``,(err, result)=>{
+    connection.query(`SELECT * FROM faculty`,(err, result)=>{
         res.send(result)
     })
 })
 
 router.get('/api/getGroup/:id', (req,res)=>{
     const body = req.params
-    console.log(body);
-    connection.query(`SELECT \`id\`, \`name\` FROM \`grouptable\` WHERE \`idFaculty\` = '${body.id}'`, (err,result)=>{
+    connection.query(`SELECT id, name FROM grouptable WHERE idFaculty = '${body.id}'`, (err,result)=>{
         res.send(result)
     })
 })
@@ -32,7 +31,7 @@ router.get('/api/getAll', async (req,res)=>{
         obj.title = arrayFaculty[i].name
         obj.groups = []
         await new Promise((resolve, reject) => {
-            connection.query(`SELECT \`id\`, \`name\` FROM \`grouptable\` WHERE \`idFaculty\` = '${arrayFaculty[i].id}'`, (err,result)=>{
+            connection.query(`SELECT id, name FROM grouptable WHERE idFaculty = '${arrayFaculty[i].id}' ORDER BY name`, (err,result)=>{
                 result.forEach(e => {
                     obj.groups.push({
                         id : e.id,

@@ -7,7 +7,6 @@ const createGroupSchedule = require('./createGroupSchedule')
 function index () {
     
     router.get('/api/groupSchedule', (req, res) => {
-        console.log(req.query);
         const query = req.query
         if (query.idGroup == undefined || query.date == undefined) {res.sendStatus(500)} else {
             connection.query(`SELECT * FROM sptraspis.schedulegroup WHERE idGroup = '${query.idGroup}' and date = '${query.date}'`,(err,result)=>{
@@ -17,7 +16,7 @@ function index () {
                         lastUpdate : result[0].dataUpdate
                     })
                 } else {
-                    res.sendStatus(500)
+                    res.sendStatus(403)
                 }
                 
             })
@@ -37,11 +36,13 @@ function index () {
                     resultObj.status = 403
                     resultObj.error = "Invalide token"
                     resolve()
+                    return
                 }
                 if (result.length == 0) {
                     resultObj.status = 403
                     resultObj.error = "Invalide token"
                     resolve()
+                    return
                 }
                 resultObj.groupId = result[0].groupId
                 resolve()

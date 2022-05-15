@@ -11,8 +11,7 @@ connection.connect((err)=> {
       else{
         console.log("Подключение к серверу MySQL успешно установлено");
       }
-});
-const md5 = require('md5')
+})
 
 const adminAPI = require('./component/admin/index')
 const authComponent = require('./component/auth/index')

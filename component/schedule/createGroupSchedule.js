@@ -30,9 +30,9 @@ async function parse () {
         const $ = cheerio.load(a)
         let dateUpdate = $('.ref').text().split(' ')[1].split('.')
         if (new Date(dataUpdate).getTime() == new Date(dateUpdate[2],Number(dateUpdate[1])-1,Number(dateUpdate[0])).getTime()) {
-            console.log('Уже новая');
+            console.log('Уже новое расписание групп');
         } else {
-            console.log('Обновление');
+            console.log('Обновление расписания групп');
             let dateText = `${dateUpdate[2]}-${Number(dateUpdate[1])}-${Number(dateUpdate[0])-3}`
             date = new Date(dateText)
             new Promise((resolve,reject)=>{
@@ -212,7 +212,7 @@ async function parse () {
             
         }
     }
-    console.log('Обновилось')
+    console.log('Обновилось расписание групп')
 }
 
 parse()

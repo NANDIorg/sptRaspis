@@ -19,7 +19,7 @@ const authComponent = require('./component/auth/index')
 const userComponent = require('./component/user/index')
 const groupFaculty = require('./component/groupFaculty/index')
 const schueld = require('./component/schedule/index')
-const teacher = require('./component/teacer/index')
+const teacher = require('./component/teacher/index')
 const loadFile = require('./lib/loadFile')
 
 app.use(bodyParser.urlencoded({ extended: false }))

@@ -9,7 +9,6 @@ const storageConfig = multer.diskStorage({
     },
     filename: (req, file, cb) =>{
         let fileName =  `${Date.now()}${createNameFile()}.${file.mimetype.split('/')[1]}`
-        console.log(fileName);
         cb(null, fileName);
     }
 })

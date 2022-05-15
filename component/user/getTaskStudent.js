@@ -6,7 +6,6 @@ router.get("/api/student/getTaskStudent", async (req, res) => {
     const token = req.query.token
     const idDiscipline = req.query.idDiscipline
 
-    // console.log(idDiscipline, token);
 
     if (token == undefined || idDiscipline == undefined) {
         res.sendStatus(403)
@@ -23,7 +22,6 @@ router.get("/api/student/getTaskStudent", async (req, res) => {
         WHERE users.token = '${md5(token)}'`, (err, result) => {    
             for (let i = 0; i < result.length; i++) {
                 const el = result[i];
-                // console.log(el.published, Date.now(), el.published > Date.now());
                 if (el.published > Date.now()) continue
                 resultArray.push({
                     id : el.id,

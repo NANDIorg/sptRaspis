@@ -32,14 +32,12 @@ function index() {
         let resultArray = []
         // const token = req.headers.token
         const body = req.body
-        console.log(body);
         // const resultCheckAdmin = await checkAdmin(token)
         let resultCheckAdmin = true
         
         if (resultCheckAdmin) {
             for (let i = 0; i < body.length; i++) {
                 const el = body[i]
-                console.log(el);
                 if (!el.login || !el.password || !el.fullname || !el.group || !el.isTeacher) {
                     resultArray.push({
                         id : el.id,

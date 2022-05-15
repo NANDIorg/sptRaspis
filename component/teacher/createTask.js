@@ -10,7 +10,6 @@ const storageConfig = multer.diskStorage({
     },
     filename: (req, file, cb) =>{
         let fileName =  `${Date.now()}${createName()}.${file.mimetype.split('/')[1]}`
-        console.log(fileName);
         cb(null, fileName);
     }
 });
@@ -31,7 +30,6 @@ router.get("/api/teacher/getGroupDiscipline", async (req,res)=>{
 
     const idDisc = query.id
 
-    console.log(query);
 
     if (!idDisc) {
         res.status(403).send("id invalid")
@@ -85,7 +83,6 @@ router.post("/api/teacher/createTask", upload.fields([{name : 'files'}]) , async
     const tokenTeacher = body.token // Токен учителя
 
     if (!nameTask || !descriptionTask || !dateFrom || !dateTo || !disciplineTask || !groupTask || !typeTask || !tokenTeacher) {
-        console.log('каких то данных нет');
         res.sendStatus(403)
         return
     }

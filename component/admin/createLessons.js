@@ -42,7 +42,6 @@ function index () {
     router.post("/api/admin/createDist", async (req, res) => {
         // const token = req.headers.token
         const body = req.body
-        console.log(body);
 
         if (!body.number || !body.title || !body.type || !body.teacher || !body.group) {
             res.sendStatus(403)
@@ -55,7 +54,6 @@ function index () {
         const group = body.group 
         
         if (nameDiscipline.length == 0 || type.length == 0 || teacher.length == 0 || group.length == 0) {
-            console.log("Данные пустые");
             res.sendStatus(403)
             return
         }
@@ -64,7 +62,6 @@ function index () {
         let resultCheckAdmin = true
         
         if (!resultCheckAdmin) {
-            console.log("Нельзя");
             res.status(403).send("Нельзя")
             return
         }

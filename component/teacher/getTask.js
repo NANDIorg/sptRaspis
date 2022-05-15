@@ -5,7 +5,6 @@ const connection = require('../../lib/connetion')
 router.get("/api/teacher/getTask", async (req,res)=>{
     const token = md5(req.query.token)
     const idDiscipline = req.query.idDiscipline
-    console.log(req.query);
 
     if (!token || !idDiscipline) {
         res.sendStatus(403)
@@ -27,7 +26,6 @@ router.get("/api/teacher/getTask", async (req,res)=>{
         WHERE tasks.idUserCreated = teacher.id
         GROUP BY tasks.id
         ORDER BY tasks.start`, (err, result)=>{
-            console.log(result,err);
             for (let i = 0; i < result.length; i++) {
                 const el = result[i];
                 resultArray.push({

@@ -7,13 +7,14 @@ async function auth (login, password, token) {
         role : 0
     }
     await new Promise((resolve, reject)=>{
-        connection.query(`SELECT id, role FROM users WHERE login = '${login}' and password = '${password}'`,(err, result)=>{
+        connection.query(`SELECT id, role, urlId FROM users WHERE login = '${login}' and password = '${password}'`,(err, result)=>{
             if (err) {
                 reject()
             }
             if (result.length != 0) {
                 res.resultLogin = true
                 res.role = result[0].role
+                res.urlId = result[0].urlId
             }
             resolve()
         })

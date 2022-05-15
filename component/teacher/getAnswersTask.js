@@ -5,9 +5,26 @@ const connection = require('../../lib/connetion')
 router.get("/api/teacher/getAnswersTask", async (req, res) => {
     const idTask = req.query.idTask
 
+
     let resultObj = {}
 
     if (!idTask) {
+        res.sendStatus(422)
+        return
+    }
+
+    let error = false
+
+    await new Promise((resolve)=>{
+        connection.query(`SELECT id FROM tasks WHERE id = '${idTask}'`,(err,result)=>{
+            if (result.length == 0) {
+                error = true
+            }
+            resolve()
+        })
+    })
+
+    if (error) {
         res.sendStatus(422)
         return
     }

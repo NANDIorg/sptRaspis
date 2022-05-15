@@ -18,7 +18,8 @@ router.post('/api/auth', async (req, res) => {
     if (result.resultLogin) {
         res.status(200).send({
             token : token,
-            role : result.role
+            role : result.role,
+            urlId : result.urlId
         })
     } else {
         res.status(403).send({error : "Ошибка входа"})

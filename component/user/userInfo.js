@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const connection = require('../../lib/connetion')
+const md5 = require('md5')
 
 function index () {
 
@@ -58,14 +59,15 @@ function index () {
         const token = md5(req.query.token)
 
         await new Promise((resolve)=>{
-            connection.query(`SELECT users.fio as fullname, grouptable.name as grouptableName, case when users.role = 0 then (year(NOW()) - grouptable.yearStart) else null end as course 
+            connection.query(`SELECT users.image ,users.fio as fullname, case when users.role = 0 then grouptable.name  else null end as grouptableName, case when users.role = 0 then (year(NOW()) - grouptable.yearStart) else null end as course 
             FROM users
             left JOIN grouptable ON grouptable.id = users.groupId
             WHERE users.token = '${token}'`,(err,result)=>{
                 res.send({
                     fullname : result[0].fullname,
                     group : result[0].grouptableName,
-                    course : result[0].course
+                    course : result[0].course,
+                    image : result[0].image
                 })
                 resolve()
             })

@@ -22,7 +22,7 @@ router.post('/api/auth', async (req, res) => {
             urlId : result.urlId
         })
     } else {
-        res.status(403).send({error : "Ошибка входа"})
+        res.status(422).send({error : true})
     }
 })
 

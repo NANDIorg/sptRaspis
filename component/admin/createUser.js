@@ -30,60 +30,95 @@ function createUrlID (url, id) {
 function index() {
     router.post('/api/admin/createUser', async (req, res)=>{
         let resultArray = []
-        // const token = req.headers.token
+        const token = req.headers.token
         const body = req.body
-        // const resultCheckAdmin = await checkAdmin(token)
-        let resultCheckAdmin = true
-        
+        console.log(token);
+        const resultCheckAdmin = await checkAdmin(token)
+        console.log(resultCheckAdmin);
+        let status = 200
         if (resultCheckAdmin) {
             for (let i = 0; i < body.length; i++) {
                 const el = body[i]
-                if (!el.login || !el.password || !el.fullname || !el.group || !el.isTeacher) {
+                let error = []
+                console.log(el);
+                if (!el.login || !el.password || !el.fullname || el.group === undefined || el.isTeacher === undefined || el.isTeacher === null || el.idUser === undefined || el.idUser === null || el.email === undefined || el.email === null) {
+                    status = 422
                     resultArray.push({
                         id : el.id,
-                        status : 403,
-                        err : "Invalid data"
+                        err : ["data"]
                     })
+                    continue
                 }
                 let errLogin = false
                 await new Promise((resolve)=>{
                     connection.query(`SELECT id FROM users WHERE login = '${el.login}'`,(err,result)=>{
                         if (err) {
-                            resolve()
                             errLogin = true
+                            error.push("login")
+                            resolve()
+                            return
                         }
                         if (result.length > 0) {
                             errLogin = true
+                            error.push("login")
                             resolve()
+                            return
                         }
+                        resolve()
                     })
                 })
 
                 if (errLogin) {
+                    status = 422 
+                }
+
+                await new Promise((resolve)=>{
+                    connection.query(`SELECT id FROM users WHERE urlId = '${el.idUser}'`,(err,result)=>{
+                        if (err) {
+                            errLogin = true
+                            error.push("url")
+                            resolve()
+                            return
+                        }
+                        if (result.length > 0) {
+                            errLogin = true
+                            error.push("url")
+                            resolve()
+                            return
+                        }
+                        resolve()
+                    })
+                })
+
+                if (errLogin) {
+                    status = 422
                     resultArray.push({
                         id : el.id,
-                        status : 403,
-                        err : "Invalide login"
+                        err : error
                     })
                     continue
                 }
-                
                 let image = `userAvatar/standartUser.png`
-                await new Promise((resolve, reject) => {
-                    connection.query(`INSERT INTO users (login, password, email, fio, groupId, role) 
-                    VALUES ('${el.login}', '${md5(el.password)}', '${el.email}', '${el.fullname}', '${(el.group == null) ? 0 : el.group}', '${(el.isTeacher) ? 1 : 0}')`,(err,result) => {
-                        connection.query(`UPDATE users SET urlId = '${createUrlID(el.idUser,result.insertId)}' WHERE (id = '${result.insertId}')`,()=>{
-                            resultArray.push({
-                                id : el.id,
-                                status : 200,
-                                err : ""
+                if (el.idUser.length == 0) {
+                    await new Promise((resolve, reject) => {
+                        connection.query(`INSERT INTO users (login, password, email, fio, groupId, role) 
+                        VALUES ('${el.login}', '${md5(el.password)}', '${el.email}', '${el.fullname}', '${(el.group == null) ? 0 : el.group}', '${(el.isTeacher) ? 1 : 0}')`,(err,result) => {
+                            connection.query(`UPDATE users SET urlId = '${createUrlID(el.idUser,result.insertId)}' WHERE (id = '${result.insertId}')`,()=>{
+                                resolve()
                             })
+                        })  
+                    })
+                } else {
+                    await new Promise((resolve, reject) => {
+                        connection.query(`INSERT INTO users (login, password, email, fio, groupId, role, urlId) 
+                        VALUES ('${el.login}', '${md5(el.password)}', '${el.email}', '${el.fullname}', '${(el.group == null) ? 0 : el.group}', '${(el.isTeacher) ? 1 : 0}', '${el.idUser}')`,(err,result) => {
                             resolve()
-                        })
-                    })  
-                })
+                        })  
+                    })
+                }
+                
             }
-            res.status(200).send(resultArray)
+            res.status(status).send(resultArray)
         } else {
             res.status(500).send({error : "Token is not true"})
         }
@@ -111,7 +146,7 @@ function index() {
             JOIN users as teacher ON teacher.id = groupTable.idTeacher
             JOIN faculty as facult ON facult.id =  groupTable.idFaculty
             JOIN users as student ON student.groupId = groupTable.id
-            where groupTable.id = ${query.groupID}`, (err, result) => {
+            where groupTable.id = '${query.groupID}'`, (err, result) => {
                 if (err) res.sendStatus(500)
                 result.forEach(el => {
                     res.send({ facultFullName : el.facultName, CuratorFIO : el.CuratorFIO, groupYearStart : el.yearStart, groupYearEnd : el.yearEnd, countStudent : el.countStudent })

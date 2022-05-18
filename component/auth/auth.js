@@ -4,7 +4,8 @@ async function auth (login, password, token) {
     console.log(login, password);
     let res = {
         resultLogin : false,
-        role : 0
+        role : 0,
+        urlId : 0
     }
     await new Promise((resolve, reject)=>{
         connection.query(`SELECT id, role, urlId FROM users WHERE login = '${login}' and password = '${password}'`,(err, result)=>{
@@ -20,12 +21,12 @@ async function auth (login, password, token) {
         })
     })
     if (!res.resultLogin) return res
-
     await new Promise((resolve, reject)=>{
         connection.query(`UPDATE users SET token = '${token}', online = '1' WHERE (login = '${login}')`, (err,result) => {
             resolve()
         })
     })
+
     return res
 }
 module.exports = auth

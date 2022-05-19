@@ -100,38 +100,66 @@ const parse = async() => {
                     }
                     lesson = `lessonNum${$(el).find("td:nth-child(2)").text()}`
                     lessonNumber = `${$(el).find("td:nth-child(2)").text()}`
+                    if ($(el).find(".ur").attr('colspan') == "1") {
+                        teacherSchedule[key][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push([
+                                {
+                                    id : lessonNumber + '1',
+                                    lessonNumber : lessonNumber,
+                                    teacher: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
+                                    auditorium: $(el).find('td:nth-child(3)').find('.z2').text(),
+                                    lessonName: $(el).find('td:nth-child(3)').find('.z3').text(),
+                                },
+                                {
+                                    id : lessonNumber + '2',
+                                    lessonNumber : lessonNumber,
+                                    teacher: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
+                                    auditorium: $(el).find('td:nth-child(4)').find('.z2').text(),
+                                    lessonName: $(el).find('td:nth-child(4)').find('.z3').text()
+                                }
+                            ]
+                        )
+                    } else {
+                        teacherSchedule[key][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push({
+                            id : lessonNumber,
+                            lessonNumber : lessonNumber,
+                            teacher : deleteN($(el).find('.ur').find('.z1').text()),
+                            auditorium: $(el).find('.ur').find('.z2').text(),
+                            lessonName: $(el).find('.ur').find('.z3').text()
+                        })
+                    }
                 } else {
                     lesson = `lessonNum${$(el).find("td:nth-child(1)").text()}`
                     lessonNumber = `${$(el).find("td:nth-child(1)").text()}`
+                    if ($(el).find(".ur").attr('colspan') == "1") {
+                        teacherSchedule[key][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push([
+                                {
+                                    id : lessonNumber + '1',
+                                    lessonNumber : lessonNumber,
+                                    teacher: deleteN($(el).find('td:nth-child(2)').find('.z1').text()),
+                                    auditorium: $(el).find('td:nth-child(2)').find('.z2').text(),
+                                    lessonName: $(el).find('td:nth-child(2)').find('.z3').text(),
+                                },
+                                {
+                                    id : lessonNumber + '2',
+                                    lessonNumber : lessonNumber,
+                                    teacher: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
+                                    auditorium: $(el).find('td:nth-child(3)').find('.z2').text(),
+                                    lessonName: $(el).find('td:nth-child(3)').find('.z3').text()
+                                }
+                            ]
+                        )
+                    } else {
+                        teacherSchedule[key][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push({
+                            id : lessonNumber,
+                            lessonNumber : lessonNumber,
+                            teacher : deleteN($(el).find('.ur').find('.z1').text()),
+                            auditorium: $(el).find('.ur').find('.z2').text(),
+                            lessonName: $(el).find('.ur').find('.z3').text()
+                        })
+                    }
                 }
 
-                if ($(el).find(".ur").attr('colspan') == "1") {
-                    teacherSchedule[key][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push([
-                            {
-                                id : lessonNumber + '1',
-                                lessonNumber : lessonNumber,
-                                teacher: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
-                                auditorium: $(el).find('td:nth-child(3)').find('.z2').text(),
-                                lessonName: $(el).find('td:nth-child(3)').find('.z3').text(),
-                            },
-                            {
-                                id : lessonNumber + '2',
-                                lessonNumber : lessonNumber,
-                                teacher: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
-                                auditorium: $(el).find('td:nth-child(4)').find('.z2').text(),
-                                lessonName: $(el).find('td:nth-child(4)').find('.z3').text()
-                            }
-                        ]
-                    )
-                } else {
-                    teacherSchedule[key][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push({
-                        id : lessonNumber,
-                        lessonNumber : lessonNumber,
-                        teacher : deleteN($(el).find('.ur').find('.z1').text()),
-                        auditorium: $(el).find('.ur').find('.z2').text(),
-                        lessonName: $(el).find('.ur').find('.z3').text()
-                    })
-                }
+                
             })
             resolve()
         })

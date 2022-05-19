@@ -3,6 +3,9 @@ const md5 = require('md5')
 const connection = require('../../lib/connetion')
 const createNameFile = require('../../lib/createNameFile')
 const multer  = require("multer");
+
+const {validateN, validateUN, validateU} = require("../../lib/validateReq")
+
 const storageConfig = multer.diskStorage({
     destination: (req, file, cb) =>{
         cb(null, "assets/tasksFile/")
@@ -18,11 +21,15 @@ router.post("/api/student/postAnswer", upload.fields([{name : 'files'}]), async 
     const token = md5(req.body.token)
     const textAnswer = req.body.reply
     const idTask = req.body.idTask
-    const files = req.files.files
+    let files = req.files.files
+    console.log(textAnswer, idTask);
 
-    if (!token || !textAnswer) {
+    if (!validateUN(token) || !validateUN(textAnswer)) {
         res.sendStatus(403)
         return
+    }
+    if (!validateU(files)) {
+        files = []
     }
 
     let idStudent = 0

@@ -58,7 +58,7 @@ router.get("/api/schedule/getScheduleTeacherToken",async (req,res)=>{
     let error = false
 
     await new Promise((resolve)=>{
-        connection.query(`SELECT scheduleteacher.idTeacher FROM users
+        connection.query(`SELECT scheduleteacher.idTeacher as idTeacher FROM users
         JOIN scheduleteacher ON scheduleteacher.idTeacher = users.id
         where token = '${token}'
         group by scheduleteacher.idTeacher`,(err,result)=>{
@@ -74,10 +74,12 @@ router.get("/api/schedule/getScheduleTeacherToken",async (req,res)=>{
 
     if (error) {
         res.status(422).send(idTeacher)
+        console.log(error);
         return
     }
 
-    res.send(idTeacher)
+    res.send({idTeacher : idTeacher})
+    
 })
 
 module.exports = router

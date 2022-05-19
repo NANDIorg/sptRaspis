@@ -7,7 +7,7 @@ router.get("/api/student/getTaskStudent", async (req, res) => {
     const idDiscipline = req.query.idDiscipline
 
 
-    if (token == undefined || idDiscipline == undefined) {
+    if (token == undefined || token == null || idDiscipline == undefined) {
         res.sendStatus(403)
         return
     }
@@ -95,6 +95,9 @@ router.get("/api/task/getMainInfo", async (req,res)=>{
     if (resultBdMain.fileId != null) {
         for (let i = 0; i < resultBdMain.fileId.split(',').length; i++) {
             const el = resultBdMain.fileId.split(',')[i];
+            if (el === "") {
+                continue
+            }
             await new Promise((resolve)=>{
                 connection.query(`SELECT * FROM image
                 where id = '${el}'`, (err,result)=>{
@@ -154,7 +157,8 @@ router.get("/api/student/getDisciplineTask", async (req, res)=>{
         JOIN disciplinestudent ON disciplinestudent.idGroup = users.groupId
         JOIN discipline ON discipline.id = disciplinestudent.idDiscipline
         JOIN typediscipline ON typediscipline.id = discipline.type
-        where users.token = '${token}'`,(err, result)=>{
+        where users.token = '${token}'
+        group by discipline.id`,(err, result)=>{
             if (result.length == 0) {
                 res.sendStatus(403)
             } else {

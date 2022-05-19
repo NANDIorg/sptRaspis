@@ -19,10 +19,10 @@ function index () {
             },
             achievements : [],
             settings : {
-                idUser: 'nastenka',
+                idUser: '',
                 visible: 'teacher',
                 notification: true,
-                email: 'example@gmail.com',
+                email: '',
                 // changedPasswordAgo: 4
             }
         }
@@ -76,6 +76,7 @@ function index () {
                 resolve()
             })
         })
+        console.log(resultObj);
 
         for (let i = 0; i < achievementsArray.length; i++) {
             const el = achievementsArray[i];
@@ -92,6 +93,7 @@ function index () {
                     }
                     achievementsObj.title = result[0].name
                     achievementsObj.description = result[0].description
+                    resolve()
                 })
             })
             await new Promise((resolve)=>{
@@ -101,19 +103,22 @@ function index () {
                         return
                     }
                     userCount = result[0].userCount
+                    resolve()
                 })
             })
             await new Promise((resolve)=>{
-                connection.query(`SELECT * FROM achievements
-                where achievements.id = '${el}'`,(err,result)=>{
+                connection.query(`SELECT COUNT(id) as count FROM achievementsuser
+                where achievementsuser.idAchievements = '${el}'`,(err,result)=>{
                     if (err || result.length == 0) {
                         resolve()
                         return
                     }
-                    achievementsObj.title = result[0].name
-                    achievementsObj.description = result[0].description
+                    userAchievementsCount = result[0].count
+                    resolve()
                 })
             })
+            achievementsObj.avg = ((userAchievementsCount / userCount) * 100).toFixed(0)
+            resultObj.achievements.push(achievementsObj)
         }
         console.log(achievementsArray);
         res.status(200).send(resultObj)

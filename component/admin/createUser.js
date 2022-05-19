@@ -4,6 +4,7 @@ const connection = require('../../lib/connetion')
 const checkAdmin = require('./checkTokenAdmin')
 const md5 = require('md5')
 const emailRegExp = /[a-z0-9]+@[a-z]+\.[a-z]{2,3}/g
+const {validateUN} = require("../../lib/validateReq")
 
 function makeUnId () {
     let text = '1234567890'
@@ -32,9 +33,12 @@ function index() {
         let resultArray = []
         const token = req.headers.token
         const body = req.body
-        console.log(token);
+        if (!validateUN(token)) {
+            res.status(500).send("Token invalid")
+            return
+        }
         const resultCheckAdmin = await checkAdmin(token)
-        console.log(resultCheckAdmin);
+        // console.log(resultCheckAdmin);
         let status = 200
         if (resultCheckAdmin) {
             for (let i = 0; i < body.length; i++) {
@@ -43,9 +47,30 @@ function index() {
                 console.log(el);
                 if (!el.login || !el.password || !el.fullname || el.group === undefined || el.isTeacher === undefined || el.isTeacher === null || el.idUser === undefined || el.idUser === null || el.email === undefined || el.email === null) {
                     status = 422
+                    if (!el.login) {
+                        error.push("login")
+                    }
+                    if (!el.password) {
+                        error.push("password")
+                    }
+                    if (!el.fullname) {
+                        error.push("fullname")
+                    }
+                    if (el.email === undefined || el.email === null) {
+                        error.push("email")
+                    }
+                    if (el.group === undefined) {
+                        error.push("group")
+                    }
+                    if (el.isTeacher === undefined || el.isTeacher === null) {
+                        error.push("isTeacher")
+                    }
+                    if (el.idUser === undefined || el.idUser === null) {
+                        error.push("fullname")
+                    }
                     resultArray.push({
                         id : el.id,
-                        err : ["data"]
+                        err : error
                     })
                     continue
                 }
@@ -119,6 +144,7 @@ function index() {
                 
             }
             res.status(status).send(resultArray)
+            console.log(resultArray);
         } else {
             res.status(500).send({error : "Token is not true"})
         }

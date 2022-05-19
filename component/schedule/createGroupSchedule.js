@@ -29,6 +29,8 @@ async function parse () {
     function parseGroup (a) {
         const $ = cheerio.load(a)
         let dateUpdate = $('.ref').text().split(' ')[1].split('.')
+        console.log(new Date(dataUpdate).getTime());
+        console.log(new Date(dateUpdate[2],Number(dateUpdate[1])-1,Number(dateUpdate[0])).getTime());
         if (new Date(dataUpdate).getTime() == new Date(dateUpdate[2],Number(dateUpdate[1])-1,Number(dateUpdate[0])).getTime()) {
             console.log('Уже новое расписание групп');
         } else {
@@ -81,53 +83,66 @@ async function parse () {
                 }
                 lesson = `lessonNum${$(el).find("td:nth-child(2)").text()}`
                 lessonNumber = `${$(el).find("td:nth-child(2)").text()}`
+                if ($(el).find(".ur").attr('colspan') == "1") {
+                    groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push([
+                            {
+                                id : lessonNumber + '1',
+                                lessonNumber : lessonNumber,
+                                lessonName: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
+                                auditorium: $(el).find('td:nth-child(3)').find('.z2').text(),
+                                teacher: $(el).find('td:nth-child(3)').find('.z3').text(),
+                            },
+                            {
+                                id : lessonNumber + '2',
+                                lessonNumber : lessonNumber,
+                                lessonName: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
+                                auditorium: $(el).find('td:nth-child(4)').find('.z2').text(),
+                                teacher: $(el).find('td:nth-child(4)').find('.z3').text()
+                            }
+                        ]
+                    )
+                } else {
+                    groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push({
+                        id : lessonNumber,
+                        lessonNumber : lessonNumber,
+                        lessonName: deleteN($(el).find('.ur').find('.z1').text()),
+                        auditorium: $(el).find('.ur').find('.z2').text(),
+                        teacher: $(el).find('.ur').find('.z3').text()
+                    })
+                }
             } else {
                 lesson = `lessonNum${$(el).find("td:nth-child(1)").text()}`
                 lessonNumber = `${$(el).find("td:nth-child(1)").text()}`
+                if ($(el).find(".ur").attr('colspan') == "1") {
+                    groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push([
+                            {
+                                id : lessonNumber + '1',
+                                lessonNumber : lessonNumber,
+                                lessonName: deleteN($(el).find('td:nth-child(2)').find('.z1').text()),
+                                auditorium: $(el).find('td:nth-child(2)').find('.z2').text(),
+                                teacher: $(el).find('td:nth-child(2)').find('.z3').text(),
+                            },
+                            {
+                                id : lessonNumber + '2',
+                                lessonNumber : lessonNumber,
+                                lessonName: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
+                                auditorium: $(el).find('td:nth-child(3)').find('.z2').text(),
+                                teacher: $(el).find('td:nth-child(3)').find('.z3').text()
+                            }
+                        ]
+                    )
+                } else {
+                    groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push({
+                        id : lessonNumber,
+                        lessonNumber : lessonNumber,
+                        lessonName: deleteN($(el).find('.ur').find('.z1').text()),
+                        auditorium: $(el).find('.ur').find('.z2').text(),
+                        teacher: $(el).find('.ur').find('.z3').text()
+                    })
+                }
             }
-            // groupSchedule[gr].weekEven = weekEv
-            if ($(el).find(".ur").attr('colspan') == "1") {
-                // groupSchedule[gr][day][lesson] = {
-                //     length: 2,
-                //     lessonName1: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
-                //     lessonName2: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
-                //     auditorium1: $(el).find('td:nth-child(3)').find('.z2').text(),
-                //     auditorium2: $(el).find('td:nth-child(4)').find('.z2').text(),
-                //     teacher1: $(el).find('td:nth-child(3)').find('.z3').text(),
-                //     teacher2: $(el).find('td:nth-child(4)').find('.z3').text()
-                // }
-                groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push([
-                        {
-                            id : lessonNumber + '1',
-                            lessonNumber : lessonNumber,
-                            lessonName: deleteN($(el).find('td:nth-child(3)').find('.z1').text()),
-                            auditorium: $(el).find('td:nth-child(3)').find('.z2').text(),
-                            teacher: $(el).find('td:nth-child(3)').find('.z3').text(),
-                        },
-                        {
-                            id : lessonNumber + '2',
-                            lessonNumber : lessonNumber,
-                            lessonName: deleteN($(el).find('td:nth-child(4)').find('.z1').text()),
-                            auditorium: $(el).find('td:nth-child(4)').find('.z2').text(),
-                            teacher: $(el).find('td:nth-child(4)').find('.z3').text()
-                        }
-                    ]
-                )
-            } else {
-                // groupSchedule[gr][day][lesson] = {
-                //     length: 1,
-                //     lessonName: deleteN($(el).find('.ur').find('.z1').text()),
-                //     auditorium: $(el).find('.ur').find('.z2').text(),
-                //     teacher: $(el).find('.ur').find('.z3').text()
-                // }
-                groupSchedule[gr][`${dateLesson[2]}-${Number(dateLesson[1])}-${Number(dateLesson[0])}`].schedule.push({
-                    id : lessonNumber,
-                    lessonNumber : lessonNumber,
-                    lessonName: deleteN($(el).find('.ur').find('.z1').text()),
-                    auditorium: $(el).find('.ur').find('.z2').text(),
-                    teacher: $(el).find('.ur').find('.z3').text()
-                })
-            }
+            // groupSchedule[gr].weekEven = weekE
+            
         })
     }
 

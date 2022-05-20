@@ -10,21 +10,10 @@ function index () {
             id : 0,
             stats : [],
             info: {
-                userImage: "",
-                initials: "",
-                course: 4,
-                group: "",
-                phrase: "",
                 contacts: []
             },
             achievements : [],
-            settings : {
-                idUser: '',
-                visible: 'teacher',
-                notification: true,
-                email: '',
-                // changedPasswordAgo: 4
-            }
+            settings : {}
         }
         const query = req.query.urlId
 
@@ -35,48 +24,221 @@ function index () {
 
         let error = false
         let achievementsArray = []
+        let userRole = 0
 
         await new Promise((resolve)=>{
-            connection.query(`
-            SELECT users.id as idUser, users.fio as FIOUser, users.image as imageUser, users.wordsUser as phraseUser, 
-            users.role as roleUser, users.vkId as vkUserLink, users.instagramId as instagramUserLink, users.tel as phoneUser, groupTable.name as groupName,
-            YEAR(NOW()) - groupTable.yearStart as courseUser, users.urlId as urlIdUser, users.selectAll as visibleUser, users.mailSend as mailSendUser,
-            users.email as emailUser, achievementsuser.id as achievementsuserID
-            FROM users 
-            JOIN groupTable ON groupTable.id = users.groupId
-            left JOIN achievementsuser ON achievementsuser.idUser = users.id
-            WHERE urlId = '${query}'`,(err, result)=>{
+            connection.query(`SELECT role FROM users WHERE urlId = '${query}'`,(err,result)=>{
                 if (err) {
                     error = true
-                    resolve()
-                    return
-                } 
-                if (result.length == 0) {
-                    error = true
+                    console.error(err);
                     resolve()
                     return
                 }
-                resultObj.id = Number(result[0].idUser)
-                resultObj.info.userImage = result[0].imageUser
-                resultObj.info.initials = result[0].FIOUser
-                resultObj.info.phrase = result[0].phraseUser
-                resultObj.info.course = result[0].courseUser
-                resultObj.info.group = result[0].groupName
-                resultObj.info.contacts.push({id: 1, link: result[0].phoneUser, img: "TelephoneIcon", type: 'tel'})
-                resultObj.info.contacts.push({id: 2, link: result[0].vkUserLink, img: "VkLogo", type: 'vk'})
-                // resultObj.info.contacts.push({id: 3, link: result[0], img: InstagramLogo, type: 'inst'})
-                resultObj.settings.idUser = result[0].urlIdUser
-                resultObj.settings.visible = (result[0].visibleUser == 1) ? false : true 
-                resultObj.settings.notification = (result[0].mailSendUser == 0) ? false : true 
-                resultObj.settings.email = result[0].emailUser
-                // resultObj.settings.changedPasswordAgo = result[0].groupName
-                result.forEach(el => {
-                    achievementsArray.push(el.achievementsuserID)
-                });
+                if (result.length == 0) {
+                    error = true
+                    console.error("Такого пользователя не существует")
+                    resolve()
+                    return
+                }
+                userRole = result[0].role
                 resolve()
             })
         })
-        console.log(resultObj);
+
+        if (error) {
+            res.sendStatus(422)
+            return
+        }
+
+        switch (userRole) {
+            case 0 :
+                await new Promise((resolve)=>{
+                    connection.query(`
+                    SELECT users.lastUpdatePasword as lastUpdatePasword, users.id as idUser, users.fio as FIOUser, users.image as imageUser, users.wordsUser as phraseUser, 
+                    users.role as roleUser, users.vkId as vkUserLink, users.instagramId as instagramUserLink, users.tel as phoneUser, groupTable.name as groupName,
+                    YEAR(NOW()) - groupTable.yearStart as courseUser, users.urlId as urlIdUser, users.selectAll as visibleUser, users.mailSend as mailSendUser,
+                    users.email as emailUser, GROUP_CONCAT(achievementsuser.id) as achievementsuserID
+                    FROM users 
+                    JOIN groupTable ON groupTable.id = users.groupId
+                    left JOIN achievementsuser ON achievementsuser.idUser = users.id
+                    WHERE urlId = '${query}'`,(err, result)=>{
+                        if (err) {
+                            error = true
+                            resolve()
+                            return
+                        } 
+                        if (result.length == 0) {
+                            error = true
+                            resolve()
+                            return
+                        }
+                        resultObj.id = Number(result[0].idUser)
+                        resultObj.info.role = userRole
+                        resultObj.info.userImage = result[0].imageUser
+                        resultObj.info.initials = result[0].FIOUser
+                        resultObj.info.phrase = result[0].phraseUser
+                        resultObj.info.course = result[0].courseUser
+                        resultObj.info.group = result[0].groupName
+                        resultObj.info.contacts.push({id: 1, link: result[0].phoneUser, img: "TelephoneIcon", type: 'tel'})
+                        resultObj.info.contacts.push({id: 2, link: result[0].vkUserLink, img: "VkLogo", type: 'vk'})
+                        // resultObj.info.contacts.push({id: 3, link: result[0], img: InstagramLogo, type: 'inst'})
+                        resultObj.settings.idUser = result[0].urlIdUser
+                        resultObj.settings.visible = (result[0].visibleUser == 1) ? false : true 
+                        resultObj.settings.notification = (result[0].mailSendUser == 0) ? false : true 
+                        resultObj.settings.email = result[0].emailUser
+                        resultObj.settings.changedPasswordAgo = ((Date.now() - result[0].lastUpdatePasword)/(1000 * 60 * 60 * 24)).toFixed(0)
+                        if (result[0].achievementsuserID !== null) {
+                            result[0].achievementsuserID.split(",").forEach(el => {
+                                achievementsArray.push(el)
+                            });
+                        } 
+                        resolve()
+                    })
+                })
+
+                await new Promise((resolve) => {
+                    connection.query(`SELECT AVG(taskuser.mark) as avgMark
+                    FROM users 
+                    join tasks on YEAR(NOW()) = year(tasks.start) and
+                    (
+                    case 
+                        when month(tasks.start) < 7 THEN 1
+                        when month(tasks.start) > 7 THEN 1
+                    end
+                    )  = (
+                    case 
+                        when month(NOW()) < 7 THEN 1
+                        when month(NOW()) > 7 THEN 1
+                    end
+                    )
+                    join taskuser on taskuser.idUser = users.id and taskuser.idTask = tasks.id
+                    WHERE urlId = '${query}'`,(err,result)=>{
+                        if (err) {
+                            error = true
+                            resolve()
+                            return
+                        } 
+                        if (result.length == 0) {
+                            resultObj.stats.push({
+                                id : 1,
+                                title : "Средняя оценка за семестр",
+                                value : 0
+                            })
+                            resolve()
+                            return
+                        }
+                        resultObj.stats.push({
+                            id : 1,
+                            title : "Средняя оценка за семестр",
+                            value : result[0].avgMark
+                        })
+                        resolve()
+                    })
+                })
+
+                await new Promise((resolve) => {
+                    connection.query(`SELECT student.id, student.fio, ( case when AVG(taskuser.mark) is not null THEN AVG(taskuser.mark) else 0 end) as avgMark, student.urlId
+                    FROM users
+                    JOIN grouptable on grouptable.id = users.groupId
+                    JOIN users as student ON student.groupId = grouptable.id
+                    left JOIN taskuser ON taskuser.idUser = student.id
+                    WHERE users.urlId = "${query}"
+                    group by student.id
+                    order by AVG(taskuser.mark) DESC`,(err,result)=>{
+                        if (err) {
+                            error = true
+                            resolve()
+                            return
+                        } 
+                        for (let i = 0; i < result.length; i++) {
+                            const el = result[i];
+                            if (el.urlId === query) {
+                                resultObj.stats.push({
+                                    id : 2,
+                                    title : "Место по рейтингу в группе",
+                                    value : i + 1
+                                })
+                                break
+                            }
+                        }
+                        resolve()
+                    })
+                })
+
+                await new Promise((resolve)=>{
+                    connection.query(`SELECT (SELECT COUNT(achievements.id) FROM achievements) as countAllAchievements, count(achievementsuser.id) as countYouAchievements
+                    FROM users 
+                    JOIN achievementsuser ON achievementsuser.idUser = users.id
+                    WHERE users.urlId = "${query}"`,(err,result)=>{
+                        if (err) {
+                            error = true
+                            resolve()
+                            return
+                        }
+                        resultObj.stats.push({
+                            id : 3,
+                            title : "Количество полученных достижений",
+                            value : `${result[0].countYouAchievements}/${result[0].countAllAchievements}`
+                        })
+                        resolve()
+                    })
+                })
+
+                break
+            case 1 :
+                await new Promise((resolve)=>{
+                    connection.query(`
+                        SELECT users.lastUpdatePasword as lastUpdatePasword, users.id as idUser, users.fio as FIOUser, users.image as imageUser, users.wordsUser as phraseUser, 
+                        users.role as roleUser, users.vkId as vkUserLink, users.instagramId as instagramUserLink, users.tel as phoneUser, groupTable.name as groupName,
+                        YEAR(NOW()) - groupTable.yearStart as courseUser, users.urlId as urlIdUser, users.selectAll as visibleUser, users.mailSend as mailSendUser,
+                        users.email as emailUser, GROUP_CONCAT(achievementsuser.id) as achievementsuserID
+                        FROM users 
+                        JOIN groupTable ON groupTable.idTeacher = users.id
+                        left JOIN achievementsuser ON achievementsuser.idUser = users.id
+                        WHERE urlId = '${query}'`,(err, result)=>{
+                        if (err) {
+                            error = true
+                            resolve()
+                            return
+                        } 
+                        if (result.length == 0) {
+                            error = true
+                            resolve()
+                            return
+                        }
+                        resultObj.id = Number(result[0].idUser)
+                        resultObj.info.userImage = result[0].imageUser
+                        resultObj.info.role = userRole
+                        resultObj.info.initials = result[0].FIOUser
+                        resultObj.info.phrase = result[0].phraseUser
+                        resultObj.info.course = null
+                        resultObj.info.group = null
+                        resultObj.info.contacts.push({id: 1, link: result[0].phoneUser, img: "TelephoneIcon", type: 'tel'})
+                        resultObj.info.contacts.push({id: 2, link: result[0].vkUserLink, img: "VkLogo", type: 'vk'})
+                        // resultObj.info.contacts.push({id: 3, link: result[0], img: InstagramLogo, type: 'inst'})
+                        resultObj.settings.idUser = result[0].urlIdUser
+                        resultObj.settings.visible = (result[0].visibleUser == 1) ? "teachers" : "all" 
+                        resultObj.settings.notification = (result[0].mailSendUser == 0) ? false : true 
+                        resultObj.settings.email = result[0].emailUser
+                        resultObj.settings.changedPasswordAgo = ((Date.now() - result[0].lastUpdatePasword)/(1000 * 60 * 60 * 24)).toFixed(0)
+                        if (result[0].achievementsuserID !== null) {
+                            result[0].achievementsuserID.split(",").forEach(el => {
+                                achievementsArray.push(el.achievementsuserID)
+                            });
+                        } 
+                        
+                        resolve()
+                    })
+                })
+                break
+            case 2 :
+                break
+        }
+        
+        if (error) {
+            res.sendStatus(422)
+            return
+        }
 
         for (let i = 0; i < achievementsArray.length; i++) {
             const el = achievementsArray[i];
@@ -120,7 +282,6 @@ function index () {
             achievementsObj.avg = ((userAchievementsCount / userCount) * 100).toFixed(0)
             resultObj.achievements.push(achievementsObj)
         }
-        console.log(achievementsArray);
         res.status(200).send(resultObj)
     })
 

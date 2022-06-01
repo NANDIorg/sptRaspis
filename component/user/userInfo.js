@@ -16,7 +16,8 @@ function index () {
             settings : {}
         }
         const query = req.query.urlId
-        const token = md5(req.headers.token)
+        
+        const token = (!!req.headers.token) ? md5(req.headers.token) : undefined
 
         if (!query || !token) {
             res.sendStatus(422)
@@ -106,13 +107,18 @@ function index () {
                         resultObj.info.phrase = result[0].phraseUser
                         resultObj.info.course = result[0].courseUser
                         resultObj.info.group = result[0].groupName
-                        resultObj.info.contacts.push({id: 1, link: result[0].phoneUser, img: "TelephoneIcon", type: 'tel'})
-                        resultObj.info.contacts.push({id: 2, link: result[0].vkUserLink, img: "VkLogo", type: 'vk'})
+                        if (result[0].phoneUser) {
+                            resultObj.info.contacts.push({id: 1, link: result[0].phoneUser, img: "TelephoneIcon", type: 'tel'})
+                        }
+                        if (result[0].vkUserLink) {
+                            resultObj.info.contacts.push({id: 2, link: result[0].vkUserLink, img: "VkLogo", type: 'vk'})
+                        }
                         // resultObj.info.contacts.push({id: 3, link: result[0], img: InstagramLogo, type: 'inst'})
                         resultObj.settings.idUser = result[0].urlIdUser
                         resultObj.settings.visible = (result[0].visibleUser == 1) ? false : true 
                         // resultObj.settings.notification = (result[0].mailSendUser == 0) ? false : true 
                         resultObj.settings.email = result[0].emailUser
+                        console.log(result);
                         resultObj.settings.changedPasswordAgo = ((Date.now() - result[0].lastUpdatePasword)/(1000 * 60 * 60 * 24)).toFixed(0)
                         if (result[0].achievementsuserID !== null) {
                             result[0].achievementsuserID.split(",").forEach(el => {
@@ -149,7 +155,8 @@ function index () {
                             resultObj.stats.push({
                                 id : 1,
                                 title : "Средняя оценка за семестр",
-                                value : 0
+                                value : 0,
+                                name : "avg_mark"
                             })
                             resolve()
                             return
@@ -157,7 +164,8 @@ function index () {
                         resultObj.stats.push({
                             id : 1,
                             title : "Средняя оценка за семестр",
-                            value : result[0].avgMark
+                            value : result[0].avgMark,
+                            name : "avg_mark"
                         })
                         resolve()
                     })
@@ -183,6 +191,7 @@ function index () {
                                 resultObj.stats.push({
                                     id : 2,
                                     title : "Место по рейтингу в группе",
+                                    name : "group_place",
                                     value : i + 1
                                 })
                                 break
@@ -205,10 +214,27 @@ function index () {
                         resultObj.stats.push({
                             id : 3,
                             title : "Количество полученных достижений",
-                            value : {
-                                countAchievements :result[0].countYouAchievements, 
-                                countAllAchievements : result[0].countAllAchievements
-                            }
+                            name : "achievements",
+                            value : [result[0].countYouAchievements,result[0].countAllAchievements]
+                        })
+                        resolve()
+                    })
+                })
+
+                await new Promise((resolve)=>{
+                    connection.query(`SELECT count(taskuser.id) as count FROM users
+                    JOIN taskuser ON taskuser.idUser = users.id and taskuser.mark is not null
+                    WHERE users.urlId = "${query}"`,(err,result)=>{
+                        if (err) {
+                            error = true
+                            resolve()
+                            return
+                        }
+                        resultObj.stats.push({
+                            id : 4,
+                            title : "Количество выполненных заданий",
+                            name : "completed_tasks",
+                            value : result[0].count
                         })
                         resolve()
                     })
@@ -268,8 +294,13 @@ function index () {
                         resultObj.info.phrase = result[0].phraseUser
                         resultObj.info.course = null
                         resultObj.info.group = null
-                        resultObj.info.contacts.push({id: 1, link: result[0].phoneUser, img: "TelephoneIcon", type: 'tel'})
-                        resultObj.info.contacts.push({id: 2, link: result[0].vkUserLink, img: "VkLogo", type: 'vk'})
+                        if (result[0].phoneUser) {
+                            resultObj.info.contacts.push({id: 1, link: result[0].phoneUser, img: "TelephoneIcon", type: 'tel'})
+                        }
+                        if (result[0].vkUserLink) {
+                            resultObj.info.contacts.push({id: 2, link: result[0].vkUserLink, img: "VkLogo", type: 'vk'})
+                        }
+                        
                         // resultObj.info.contacts.push({id: 3, link: result[0], img: InstagramLogo, type: 'inst'})
                         resultObj.settings.idUser = result[0].urlIdUser
                         resultObj.settings.visible = (result[0].visibleUser == 1) ? "teachers" : "all" 
@@ -279,32 +310,32 @@ function index () {
                         resultObj.stats.push({
                             id : 1,
                             title : "Средняя оценка вашей группы",
-                            value : result[0].avgGroupMark.toFixed(2)
+                            value : (result[0].avgGroupMark) ? result[0].avgGroupMark.toFixed(2) : 0,
+                            name : "avg_mark"
                         })
                         resultObj.stats.push({
                             id : 2,
                             title : "Вы руководитель группы",
-                            value : result[0].groupName
+                            value : result[0].groupName,
+                            name : "group"
                         })
                         resultObj.stats.push({
                             id : 3,
                             title : "Количество полученных достижений",
-                            value : {
-                                countAchievements :result[0].countAchievements, 
-                                countAllAchievements : result[0].countAllAchievements
-                            }
+                            value : [result[0].countAchievements, result[0].countAllAchievements],
+                            name : "achievements"
                         })
                         resultObj.stats.push({
                             id : 4,
                             title : "Количество проверенных заданий",
-                            value : result[0].countTaskVerified
+                            value : result[0].countTaskVerified,
+                            name : "completed_tasks"
                         })
                         if (result[0].achievementsuserID !== null) {
                             result[0].achievementsuserID.split(",").forEach(el => {
                                 achievementsArray.push(el.achievementsuserID)
                             });
                         } 
-                        console.log(result);
                         resolve()
                     })
                 })
@@ -334,6 +365,7 @@ function index () {
                     }
                     achievementsObj.title = result[0].name
                     achievementsObj.description = result[0].description
+                    achievementsObj.image = result[0].image
                     resolve()
                 })
             })

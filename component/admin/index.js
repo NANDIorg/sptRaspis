@@ -5,6 +5,7 @@ const createLessons = require('./createLessons')
 const createGroup = require('./createGroup')
 const getControlsValues = require('./getControlsValues')
 const postUpdateSchedule = require('./postUpdateSchedule')
+const postCreateFacult = require('./postCreateFacult')
 
 
 function index () {
@@ -13,6 +14,7 @@ function index () {
     router.use(createGroup)
     router.use(getControlsValues)
     router.use(postUpdateSchedule)
+    router.use(postCreateFacult)
 
     return router
 }

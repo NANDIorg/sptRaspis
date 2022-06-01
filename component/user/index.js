@@ -6,6 +6,9 @@ const userInfo = require("./userInfo")
 const getTaskStudent = require("./getTaskStudent")
 const postAnswer = require("./postAnswer")
 const authToken = require("./authToken")
+const getListRaitingDiscipline = require("./getListRaitingDiscipline")
+const getIdDialog = require("./getIdDialog")
+const postSendMessage = require("./postSendMessage")
 
 function index () {
     router.use(searchUser())
@@ -13,6 +16,9 @@ function index () {
     router.use(authToken)
     router.use(getTaskStudent)
     router.use(postAnswer)
+    router.use(getListRaitingDiscipline)
+    router.use(getIdDialog)
+    router.use(postSendMessage)
 
     return router
 }

@@ -32,6 +32,8 @@ app.use(userComponent())
 app.use(groupFaculty)
 app.use(loadFile)
 
+const WSServer = require("./websocket/index")
+
 // app.use(griupScheduleComponent)
 
 app.use("/userAvatar", express.static(path.join(__dirname,"assets/image/userAvatar")))

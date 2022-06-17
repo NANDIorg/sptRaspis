@@ -118,7 +118,6 @@ function index () {
                         resultObj.settings.visible = (result[0].visibleUser == 1) ? false : true 
                         // resultObj.settings.notification = (result[0].mailSendUser == 0) ? false : true 
                         resultObj.settings.email = result[0].emailUser
-                        console.log(result);
                         resultObj.settings.changedPasswordAgo = ((Date.now() - result[0].lastUpdatePasword)/(1000 * 60 * 60 * 24)).toFixed(0)
                         if (result[0].achievementsuserID !== null) {
                             result[0].achievementsuserID.split(",").forEach(el => {
@@ -283,7 +282,6 @@ function index () {
                         if (result.length == 0) {
                             error = true
                             resolve()
-                            console.log(result);
                             return
                         }
                         resultObj.id = Number(result[0].idUser)

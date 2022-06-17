@@ -22,7 +22,6 @@ router.post("/api/student/postAnswer", upload.fields([{name : 'files'}]), async 
     const textAnswer = req.body.reply
     const idTask = req.body.idTask
     let files = req.files.files
-    console.log(textAnswer, idTask);
 
     if (!validateUN(token) || !validateUN(textAnswer)) {
         res.sendStatus(403)

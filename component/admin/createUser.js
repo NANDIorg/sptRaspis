@@ -38,13 +38,11 @@ function index() {
             return
         }
         const resultCheckAdmin = await checkAdmin(token)
-        // console.log(resultCheckAdmin);
         let status = 200
         if (resultCheckAdmin) {
             for (let i = 0; i < body.length; i++) {
                 const el = body[i]
                 let error = []
-                console.log(el);
                 if (!el.login || !el.password || !el.fullname || el.group === undefined || el.isTeacher === undefined || el.isTeacher === null || el.idUser === undefined || el.idUser === null || el.email === undefined || el.email === null) {
                     status = 422
                     if (!el.login) {
@@ -97,23 +95,26 @@ function index() {
                     status = 422 
                 }
 
-                await new Promise((resolve)=>{
-                    connection.query(`SELECT id FROM users WHERE urlId = '${el.idUser}'`,(err,result)=>{
-                        if (err) {
-                            errLogin = true
-                            error.push("url")
+                if (el.idUser != 0) {
+                    await new Promise((resolve)=>{
+                        connection.query(`SELECT id FROM users WHERE urlId = '${el.idUser}'`,(err,result)=>{
+                            if (err) {
+                                errLogin = true
+                                error.push("url")
+                                resolve()
+                                return
+                            }
+                            if (result.length > 0) {
+                                errLogin = true
+                                error.push("url")
+                                resolve()
+                                return
+                            }
                             resolve()
-                            return
-                        }
-                        if (result.length > 0) {
-                            errLogin = true
-                            error.push("url")
-                            resolve()
-                            return
-                        }
-                        resolve()
+                        })
                     })
-                })
+                }
+                
 
                 if (errLogin) {
                     status = 422
@@ -124,7 +125,7 @@ function index() {
                     continue
                 }
                 let image = `userAvatar/standartUser.png`
-                if (el.idUser.length == 0) {
+                if (!el.idUser) {
                     await new Promise((resolve, reject) => {
                         connection.query(`INSERT INTO users (login, password, email, fio, groupId, role) 
                         VALUES ('${el.login}', '${md5(el.password)}', '${el.email}', '${el.fullname}', '${(el.group == null) ? 0 : el.group}', '${(el.isTeacher) ? 1 : 0}')`,(err,result) => {
@@ -144,7 +145,6 @@ function index() {
                 
             }
             res.status(status).send(resultArray)
-            console.log(resultArray);
         } else {
             res.status(500).send({error : "Token is not true"})
         }
@@ -169,7 +169,7 @@ function index() {
 
         await new Promise((resolve) => {
             connection.query(`SELECT groupTable.yearStart, groupTable.yearEnd, teacher.fio as CuratorFIO, facult.fullName as facultName, count(student.id) as countStudent FROM grouptable as groupTable
-            JOIN users as teacher ON teacher.id = groupTable.idTeacher
+            left JOIN users as teacher ON teacher.id = groupTable.idTeacher
             JOIN faculty as facult ON facult.id =  groupTable.idFaculty
             JOIN users as student ON student.groupId = groupTable.id
             where groupTable.id = '${query.groupID}'`, (err, result) => {

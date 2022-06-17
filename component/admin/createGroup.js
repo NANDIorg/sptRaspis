@@ -36,6 +36,7 @@ router.get("/api/admin/createGroup/getFacultet", async(req,res)=>{
                 resolve()
             }
             res.send(result)
+            
             resolve()
         })
     })

@@ -44,6 +44,7 @@ wss.on('connection', (ws) => {
             metadata.token = request.body.token
             clients.set(ws, metadata)
             console.log(metadata);
+            ws.send('{"result": "приконектился"}');
         } else if(!WebSocketFuntion[request.method]) {
             ws.send('{"error": "Unknown method"}');
             return;

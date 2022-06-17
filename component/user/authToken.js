@@ -4,6 +4,10 @@ const connection = require('../../lib/connetion')
 
 router.post("/api/authToken",async (req,res)=>{
     const token = req.body.token
+    if (!token) {
+        res.status(422).send("data invalid")
+        return
+    }
     await new Promise((resolve)=>{
         connection.query(`SELECT * FROM users WHERE token = '${md5(token)}'`,(err,result)=>{
             if (result.length > 0) {
@@ -14,7 +18,7 @@ router.post("/api/authToken",async (req,res)=>{
                 resolve()
                 return
             }
-            res.sendStatus(422)
+            res.status(422).send("token invalid")
             resolve()
         })
     })

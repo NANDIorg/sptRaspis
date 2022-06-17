@@ -9,6 +9,9 @@ const authToken = require("./authToken")
 const getListRaitingDiscipline = require("./getListRaitingDiscipline")
 const getIdDialog = require("./getIdDialog")
 const postSendMessage = require("./postSendMessage")
+const getAllDialog = require("./getAllDialog")
+const getDialogInfo = require("./getDialogInfo")
+const getStudentHomeTasks = require("./getStudentHomeTasks")
 
 function index () {
     router.use(searchUser())
@@ -19,6 +22,9 @@ function index () {
     router.use(getListRaitingDiscipline)
     router.use(getIdDialog)
     router.use(postSendMessage)
+    router.use(getAllDialog)
+    router.use(getDialogInfo)
+    router.use(getStudentHomeTasks)
 
     return router
 }

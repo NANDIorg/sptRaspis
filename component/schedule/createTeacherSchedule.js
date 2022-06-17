@@ -222,6 +222,11 @@ const parse = async() => {
 parse()
 
 setInterval(()=>{
-    console.log(date);
-    parse()
+    try {
+        console.log(date);
+        parse()
+    } catch {
+        console.log("Ошибка обновления расписания");
+    }
 },3600000)
+

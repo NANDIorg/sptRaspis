@@ -43,21 +43,28 @@ function index () {
         // const token = req.headers.token
         const body = req.body
 
-        if (!body.number || !body.title || !body.type || !body.teacher || !body.group) {
-            res.sendStatus(403)
+        if (!body.title || !body.type || !body.teacher || !body.group) {
+            res.status(403).send("data invalid")
             return
         }
-        
-        const nameDiscipline = body.number + body.title
+
+
+        let nameDiscipline
+
+        if (body.number) {
+            nameDiscipline = body.number + body.title
+        } else {
+            nameDiscipline = body.title
+        }
+
         const type = body.type
         const teacher = body.teacher
         const group = body.group 
         
         if (nameDiscipline.length == 0 || type.length == 0 || teacher.length == 0 || group.length == 0) {
-            res.sendStatus(403)
+            res.status(403).send("data invalid")
             return
         }
-
         // const resultCheckAdmin = await checkAdmin(token)
         let resultCheckAdmin = true
         
@@ -92,6 +99,7 @@ function index () {
                 })
             })
         }
+        res.sendStatus(200)
     })
 
     return router

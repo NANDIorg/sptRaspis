@@ -78,7 +78,7 @@ router.get("/api/teacher/getAnswerStudent", async (req,res)=>{
     for (let i = 0; i < fileId.length; i++) {
         const el = fileId[i];
         await new Promise((resolve)=>{
-            connection.query(`SELECT * FROM image WHERE id = '5'`,(err,result)=>{
+            connection.query(`SELECT * FROM image WHERE id = '${el}'`,(err,result)=>{
                 resultObj.reply.files.push({
                     id : result[0].id,
                     src : `tasksFile/${result[0].name}`,

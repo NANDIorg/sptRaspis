@@ -4,10 +4,10 @@ const connection = require('../../lib/connetion')
 
 router.get(`/api/student/getListRaitingDiscipline`, async (req,res)=>{
     const idDiscipline = req.query.idDiscipline
-    const token = (!!req.headers.token) ? md5(req.headers.token) : undefined
+    const token = (req.headers.token) ? md5(req.headers.token) : null
 
     if (!token || !idDiscipline) {
-        res.sendStatus(422)
+        res.status(422).send("data invalid")
         return
     }
 
@@ -15,13 +15,12 @@ router.get(`/api/student/getListRaitingDiscipline`, async (req,res)=>{
     let error = false
     let resultObj = {
         id : 0,
-        title : "",
-        youPlace : 0,
-        usersTop : []
+        disciplineTitle : "",
+        users : []
     }
 
     await new Promise((resolve)=>{
-        connection.query(`select id from user where token = '${token}'`,(err,result)=>{
+        connection.query(`select id from users where token = '${token}'`,(err,result)=>{
             if (err) {
                 error = true
                 console.log(err)
@@ -40,13 +39,13 @@ router.get(`/api/student/getListRaitingDiscipline`, async (req,res)=>{
     })
 
     if (error) {
-        res.sendStatus(422)
+        res.status(422).send("token invalid")
         return
     }
 
     await new Promise((resolve)=>{
         connection.query(`
-        SELECT users.id,users.image,( avg(taskuser.mark) * (count(taskuser.mark)/count(tasks.id)*100)) as top, grouptable.name as groupName, avg(taskuser.mark) as avgMark, count(taskuser.mark) as compliteTask, users.fio,(SELECT name FROM discipline Where id = @idDiscipline) as disciplineName
+        SELECT users.urlId, users.id,users.image,( avg(taskuser.mark) * (count(taskuser.mark)/count(tasks.id)*100)) as top, grouptable.name as groupName, avg(taskuser.mark) as avgMark, count(taskuser.mark) as compliteTask, users.fio,(SELECT name FROM discipline Where id = @idDiscipline) as disciplineName
         FROM users
         JOIN disciplinestudent ON disciplinestudent.idGroup = users.groupId and disciplinestudent.idDiscipline = @idDiscipline
         join grouptable ON grouptable.id = users.groupId
@@ -66,19 +65,19 @@ router.get(`/api/student/getListRaitingDiscipline`, async (req,res)=>{
                 resolve()
                 return
             }
-            resultObj.title = result[0].disciplineName
+            resultObj.disciplineTitle = result[0].disciplineName
             for (let i = 0; i < result.length; i++) {
                 const el = result[i];
                 if (el.id == idUserYou) {
-                    resultObj.youPlace = i + 1
+                    resultObj.place = i + 1
                 }
-                resultObj.usersTop.push({
-                    id : i,
+                resultObj.users.push({
+                    id : el.urlId,
                     fullname : el.fio,
-                    groupName : el.groupName,
-                    avgMark : el.avgMark,
-                    image : el.image,
-                    compliteTask : el.compliteTask,
+                    group : el.groupName,
+                    mark : el.avgMark,
+                    img : el.image,
+                    complitedTasks : el.compliteTask,
                     isYou : (el.id == idUserYou) ? true : false
                 })
             }
@@ -87,7 +86,7 @@ router.get(`/api/student/getListRaitingDiscipline`, async (req,res)=>{
     })
 
     if (error) {
-        res.sendStatus(422)
+        res.status(422).send("sql invalid")
         return
     }
 

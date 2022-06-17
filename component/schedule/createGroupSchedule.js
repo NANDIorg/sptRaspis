@@ -29,6 +29,7 @@ async function parse () {
     function parseGroup (a) {
         const $ = cheerio.load(a)
         let dateUpdate = $('.ref').text().split(' ')[1].split('.')
+        console.log(dateUpdate);
         console.log(new Date(dataUpdate).getTime());
         console.log(new Date(dateUpdate[2],Number(dateUpdate[1])-1,Number(dateUpdate[0])).getTime());
         if (new Date(dataUpdate).getTime() == new Date(dateUpdate[2],Number(dateUpdate[1])-1,Number(dateUpdate[0])).getTime()) {
@@ -233,8 +234,12 @@ async function parse () {
 parse()
 
 setInterval(()=>{
-    console.log(date);
-    parse()
+    try {
+        console.log(date);
+        parse()
+    } catch {
+        console.log("Ошибка обновления расписания");
+    }
 },3600000)
 
 // module.exports = groupSchedule
